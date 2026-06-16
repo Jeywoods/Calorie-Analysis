@@ -131,11 +131,47 @@ fun ImageCropperDialog(
                             canvasSize = it
                             Log.d("Cropper", "onSizeChanged: ${it.width}x${it.height}")
                         }
-                        .pointerInput(Unit) {
+                        .pointerInput(canvasSize, cropDisplaySize) {
                             detectDragGestures { change, dragAmount ->
                                 change.consume()
-                                cropCenterX += dragAmount.x
-                                cropCenterY += dragAmount.y
+
+                                val bitmapRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+                                val canvasRatio = canvasSize.width.toFloat() / canvasSize.height.toFloat()
+
+                                val imageWidth: Float
+                                val imageHeight: Float
+                                val imageLeft: Float
+                                val imageTop: Float
+
+                                if (bitmapRatio > canvasRatio) {
+                                    imageWidth = canvasSize.width.toFloat()
+                                    imageHeight = canvasSize.width.toFloat() / bitmapRatio
+                                    imageLeft = 0f
+                                    imageTop = (canvasSize.height - imageHeight) / 2f
+                                } else {
+                                    imageHeight = canvasSize.height.toFloat()
+                                    imageWidth = canvasSize.height.toFloat() * bitmapRatio
+                                    imageLeft = (canvasSize.width - imageWidth) / 2f
+                                    imageTop = 0f
+                                }
+
+                                val imageRight = imageLeft + imageWidth
+                                val imageBottom = imageTop + imageHeight
+
+                                // Квадрат не может быть больше изображения
+                                val halfSize = minOf(cropDisplaySize / 2, imageWidth / 2, imageHeight / 2)
+
+                                val minX = imageLeft + halfSize
+                                val maxX = imageRight - halfSize
+                                val minY = imageTop + halfSize
+                                val maxY = imageBottom - halfSize
+
+                                if (minX <= maxX) {
+                                    cropCenterX = (cropCenterX + dragAmount.x).coerceIn(minX, maxX)
+                                }
+                                if (minY <= maxY) {
+                                    cropCenterY = (cropCenterY + dragAmount.y).coerceIn(minY, maxY)
+                                }
                             }
                         },
                     contentAlignment = Alignment.Center
