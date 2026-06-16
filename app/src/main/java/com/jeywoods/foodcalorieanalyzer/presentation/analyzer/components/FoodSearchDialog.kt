@@ -30,9 +30,7 @@ fun FoodSearchDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text("Поиск блюда")
-        },
+        title = { Text("Поиск блюда") },
         text = {
             Column {
                 OutlinedTextField(
@@ -56,25 +54,29 @@ fun FoodSearchDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if (searchResults.isNotEmpty()) {
-                    LazyColumn(
-                        modifier = Modifier.height(400.dp)
-                    ) {
+                    LazyColumn(modifier = Modifier.height(400.dp)) {
                         items(searchResults) { food ->
-                            FoodSearchItem(
-                                foodItem = food,
-                                onClick = { onFoodSelected(food) }
-                            )
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onFoodSelected(food) }
+                            ) {
+                                Text(
+                                    text = food.russianName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+                                )
+                            }
                         }
                     }
                 } else if (searchQuery.isNotBlank()) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
+                        modifier = Modifier.fillMaxWidth().height(100.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Ничего не найдено",
+                            "Ничего не найдено",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -84,52 +86,13 @@ fun FoodSearchDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
+                Text("Закрыть")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
                 Text("Отмена")
             }
         }
     )
-}
-
-@Composable
-private fun FoodSearchItem(
-    foodItem: FoodItem,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = foodItem.russianName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "${foodItem.caloriesPer100g.toInt()} ккал/100г",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "${foodItem.proteinPer100g}г Б",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "${foodItem.fatPer100g}г Ж | ${foodItem.carbsPer100g}г У",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
 }
