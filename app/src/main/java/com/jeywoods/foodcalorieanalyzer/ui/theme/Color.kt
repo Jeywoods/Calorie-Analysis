@@ -2,42 +2,43 @@ package com.jeywoods.foodcalorieanalyzer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary colors
-val PrimaryLight = Color(0xFF4CAF50)
-val PrimaryDark = Color(0xFF388E3C)
-val PrimaryContainer = Color(0xFFC8E6C9)
+// ==================== PRIMARY ====================
+val Primary = Color(0xFF689F38)            // Оливковый
+val PrimaryDark = Color(0xFF558B2F)        // Тёмно-оливковый
+val PrimaryLight = Color(0xFF8BC34A)       // Светло-оливковый
+val PrimaryContainer = Color(0xFFDCEDC8)   // Фисташковый
+val OnPrimaryContainer = Color(0xFF33691E) // Тёмно-зелёный текст
 
-// Secondary colors
-val SecondaryLight = Color(0xFF2196F3)
-val SecondaryDark = Color(0xFF1976D2)
-val SecondaryContainer = Color(0xFFBBDEFB)
+// ==================== SECONDARY ====================
+val Secondary = Color(0xFF8D6E63)          // Коричневый
+val SecondaryContainer = Color(0xFFD7CCC8) // Светло-коричневый
 
-// Background colors
-val BackgroundLight = Color(0xFFF5F5F5)
-val BackgroundDark = Color(0xFF121212)
-val SurfaceLight = Color(0xFFFFFFFF)
-val SurfaceDark = Color(0xFF1E1E1E)
+// ==================== BACKGROUND ====================
+val Background = Color(0xFFF5F0E8)         // Бежевый фон
+val Surface = Color(0xFFFFFFFF)            // Белые карточки
+val SurfaceVariant = Color(0xFFF9F6F0)     // Светло-бежевый
 
-// Status colors
+// ==================== TEXT ====================
+val OnBackground = Color(0xFF3E2723)       // Тёмно-коричневый текст
+val OnSurface = Color(0xFF4E342E)          // Коричневый текст
+val OnSurfaceLight = Color(0xFF8D6E63)     // Светло-коричневый текст
+
+// ==================== NUTRITION COLORS ====================
+val CaloriesColor = Color(0xFFD84315)      // Красно-оранжевый (калории)
+val ProteinColor = Color(0xFF1976D2)       // Синий (белки)
+val FatColor = Color(0xFFF57C00)           // Оранжевый (жиры)
+val CarbsColor = Color(0xFF689F38)         // Зелёный (углеводы)
+
+// ==================== CALENDAR ====================
+val CalendarDayWithData = Color(0xFFDCEDC8) // Светло-зелёный (дни с данными)
+val CalendarSelected = Color(0xFF689F38)    // Оливковый (выбранный день)
+val CalendarToday = Color(0xFF33691E)       // Тёмно-зелёный (сегодня)
+
+// ==================== STATUS ====================
 val Success = Color(0xFF4CAF50)
 val Warning = Color(0xFFFFC107)
 val Error = Color(0xFFF44336)
+val ErrorContainer = Color(0xFFFFEBEE)
 
-// Nutrition colors
-val CaloriesColor = Color(0xFFFF5722)
-val ProteinColor = Color(0xFF2196F3)
-val FatColor = Color(0xFFFFC107)
-val CarbsColor = Color(0xFF4CAF50)
-
-// Calendar colors
-val CalendarGreen = Color(0xFF81C784)
-val CalendarYellow = Color(0xFFFFF176)
-val CalendarOrange = Color(0xFFFFB74D)
-val CalendarRed = Color(0xFFE57373)
-val CalendarGray = Color(0xFFBDBDBD)
-
-// Custom colors
-val DividerColor = Color(0xFFE0E0E0)
-val CardBorder = Color(0xFFE0E0E0)
-val ConfirmedGreen = Color(0xFF4CAF50)
-val DeleteRed = Color(0xFFF44336)
+// ==================== DIVIDER ====================
+val DividerColor = Color(0xFFD7CCC8)
