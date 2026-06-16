@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jeywoods.foodcalorieanalyzer.data.repository.FoodRepositoryImpl
 import com.jeywoods.foodcalorieanalyzer.domain.model.FoodItem
 import com.jeywoods.foodcalorieanalyzer.domain.model.PredictionItem
 import com.jeywoods.foodcalorieanalyzer.domain.usecase.*
@@ -21,7 +22,8 @@ class AnalyzerViewModel @Inject constructor(
     private val calculateNutritionUseCase: CalculateNutritionUseCase,
     private val addMealUseCase: AddMealUseCase,
     private val searchFoodUseCase: SearchFoodUseCase,
-    private val savePhotoUseCase: SavePhotoUseCase
+    private val savePhotoUseCase: SavePhotoUseCase,
+    private val foodRepository: FoodRepositoryImpl
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AnalyzerUiState>(AnalyzerUiState.Idle)
@@ -31,39 +33,22 @@ class AnalyzerViewModel @Inject constructor(
     private var allPredictions: List<PredictionItem> = emptyList()
 
     fun onImageSelected(bitmap: Bitmap) {
-        Log.d("AnalyzerVM", "=== onImageSelected CALLED ===")
-        Log.d("AnalyzerVM", "Bitmap: ${bitmap.width}x${bitmap.height}, config: ${bitmap.config}")
-
         _uiState.value = AnalyzerUiState.Analyzing
-
         viewModelScope.launch {
             try {
-                Log.d("AnalyzerVM", "Saving photo...")
                 val imagePath = savePhotoUseCase(bitmap)
                 currentImagePath = imagePath
-                Log.d("AnalyzerVM", "Photo saved: $imagePath")
-
-                Log.d("AnalyzerVM", "Starting classification...")
                 val classificationResult = classifyFoodUseCase(imagePath)
-                Log.d("AnalyzerVM", "Classification done, predictions: ${classificationResult.predictions.size}")
-
                 val topPredictions = getTopPredictionsUseCase(classificationResult)
                 allPredictions = topPredictions
-
-                Log.d("AnalyzerVM", "Top predictions: ${topPredictions.size}")
-                topPredictions.forEach { pred ->
-                    Log.d("AnalyzerVM", "  ${pred.foodItem.russianName}: ${pred.confidencePercent}")
-                }
 
                 _uiState.value = AnalyzerUiState.PredictionsReady(
                     imagePath = imagePath,
                     predictions = topPredictions,
                     selectedPrediction = topPredictions.firstOrNull()
                 )
-                Log.d("AnalyzerVM", "State: PredictionsReady")
-
             } catch (e: Exception) {
-                Log.e("AnalyzerVM", "Error in classification", e)
+                Log.e("AnalyzerVM", "Error", e)
                 _uiState.value = AnalyzerUiState.Error(e.message ?: "Ошибка анализа")
             }
         }
@@ -81,7 +66,21 @@ class AnalyzerViewModel @Inject constructor(
     fun onGramsChanged(grams: Float) {
         val currentState = _uiState.value
         when (currentState) {
-            is AnalyzerUiState.PredictionsReady -> currentState.selectedPrediction?.let { calculateNutrition(it.foodItem, grams) }
+            is AnalyzerUiState.PredictionsReady -> {
+                currentState.selectedPrediction?.let {
+                    calculateNutrition(it.foodItem, grams)
+                    _uiState.value = AnalyzerUiState.NutritionCalculated(
+                        imagePath = currentImagePath ?: "",
+                        predictions = allPredictions,
+                        selectedPrediction = it,
+                        grams = grams,
+                        calculatedCalories = 0f,
+                        calculatedProtein = 0f,
+                        calculatedFat = 0f,
+                        calculatedCarbs = 0f
+                    )
+                }
+            }
             is AnalyzerUiState.NutritionCalculated -> calculateNutrition(currentState.selectedPrediction.foodItem, grams)
             else -> {}
         }
@@ -89,17 +88,107 @@ class AnalyzerViewModel @Inject constructor(
 
     private fun calculateNutrition(foodItem: FoodItem, grams: Float) {
         if (grams <= 0) return
-        val nutrition = calculateNutritionUseCase(foodItem, grams)
-        _uiState.value = AnalyzerUiState.NutritionCalculated(
-            imagePath = currentImagePath ?: "",
-            predictions = allPredictions,
-            selectedPrediction = allPredictions.find { it.foodItem.id == foodItem.id } ?: allPredictions.first(),
-            grams = grams,
-            calculatedCalories = nutrition.calories,
-            calculatedProtein = nutrition.protein,
-            calculatedFat = nutrition.fat,
-            calculatedCarbs = nutrition.carbs
-        )
+        val nutrition = foodItem.calculateNutrition(grams)
+        val currentState = _uiState.value
+        if (currentState is AnalyzerUiState.NutritionCalculated) {
+            _uiState.value = currentState.copy(
+                grams = grams,
+                calculatedCalories = nutrition.calories,
+                calculatedProtein = nutrition.protein,
+                calculatedFat = nutrition.fat,
+                calculatedSaturatedFat = nutrition.saturatedFat,
+                calculatedCarbs = nutrition.carbs,
+                calculatedFiber = nutrition.fiber,
+                calculatedSugar = nutrition.sugar,
+                calculatedSodium = nutrition.sodium,
+                calculatedPotassium = nutrition.potassium,
+                calculatedCholesterol = nutrition.cholesterol
+            )
+        }
+    }
+
+    fun goToGramsStep() {
+        val currentState = _uiState.value
+        if (currentState !is AnalyzerUiState.PredictionsReady) return
+        val selected = currentState.selectedPrediction ?: return
+
+        _uiState.value = AnalyzerUiState.Analyzing
+
+        viewModelScope.launch {
+            try {
+                val searchQuery = selected.foodItem.englishName.replace("_", " ")
+                val apiData = foodRepository.searchFoodsOnline(searchQuery)
+                val enrichedFood = if (apiData.isNotEmpty()) {
+                    val apiFood = apiData.first()
+                    selected.foodItem.copy(
+                        caloriesPer100g = apiFood.caloriesPer100g,
+                        proteinPer100g = apiFood.proteinPer100g,
+                        fatPer100g = apiFood.fatPer100g,
+                        saturatedFatPer100g = apiFood.saturatedFatPer100g,
+                        carbsPer100g = apiFood.carbsPer100g,
+                        fiberPer100g = apiFood.fiberPer100g,
+                        sugarPer100g = apiFood.sugarPer100g,
+                        sodiumPer100g = apiFood.sodiumPer100g,
+                        potassiumPer100g = apiFood.potassiumPer100g,
+                        cholesterolPer100g = apiFood.cholesterolPer100g
+                    )
+                } else {
+                    selected.foodItem
+                }
+
+                val enrichedPrediction = selected.copy(foodItem = enrichedFood)
+                val grams = 100f
+                val nutrition = enrichedFood.calculateNutrition(grams)
+
+                _uiState.value = AnalyzerUiState.NutritionCalculated(
+                    imagePath = currentImagePath ?: "",
+                    predictions = currentState.predictions,
+                    selectedPrediction = enrichedPrediction,
+                    grams = grams,
+                    calculatedCalories = nutrition.calories,
+                    calculatedProtein = nutrition.protein,
+                    calculatedFat = nutrition.fat,
+                    calculatedSaturatedFat = nutrition.saturatedFat,
+                    calculatedCarbs = nutrition.carbs,
+                    calculatedFiber = nutrition.fiber,
+                    calculatedSugar = nutrition.sugar,
+                    calculatedSodium = nutrition.sodium,
+                    calculatedPotassium = nutrition.potassium,
+                    calculatedCholesterol = nutrition.cholesterol
+                )
+            } catch (e: Exception) {
+                Log.e("AnalyzerVM", "Error fetching nutrition", e)
+                val grams = 100f
+                val nutrition = selected.foodItem.calculateNutrition(grams)
+                _uiState.value = AnalyzerUiState.NutritionCalculated(
+                    imagePath = currentImagePath ?: "",
+                    predictions = currentState.predictions,
+                    selectedPrediction = selected,
+                    grams = grams,
+                    calculatedCalories = nutrition.calories,
+                    calculatedProtein = nutrition.protein,
+                    calculatedFat = nutrition.fat,
+                    calculatedSaturatedFat = nutrition.saturatedFat,
+                    calculatedCarbs = nutrition.carbs,
+                    calculatedFiber = nutrition.fiber,
+                    calculatedSugar = nutrition.sugar,
+                    calculatedSodium = nutrition.sodium,
+                    calculatedPotassium = nutrition.potassium,
+                    calculatedCholesterol = nutrition.cholesterol
+                )
+            }
+        }
+    }
+
+    fun goBackToSelectFood() {
+        val currentState = _uiState.value
+        if (currentState is AnalyzerUiState.NutritionCalculated) {
+            _uiState.value = AnalyzerUiState.PredictionsReady(
+                imagePath = currentImagePath ?: "",
+                predictions = allPredictions,
+                selectedPrediction = currentState.selectedPrediction
+            )
+        }
     }
 
     fun onAddToDiary(): Boolean {
@@ -117,7 +206,6 @@ class AnalyzerViewModel @Inject constructor(
                 Log.e("AnalyzerVM", "Error adding meal", e)
             }
         }
-
         resetState()
         return true
     }
