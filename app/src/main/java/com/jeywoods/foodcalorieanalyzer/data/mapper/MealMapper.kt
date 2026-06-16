@@ -12,11 +12,7 @@ object MealMapper {
         val foodItem = Food101Metadata.getFoodById(entity.foodItemId) ?: FoodItem(
             id = entity.foodItemId,
             englishName = entity.englishName,
-            russianName = entity.russianName,
-            caloriesPer100g = 0f,
-            proteinPer100g = 0f,
-            fatPer100g = 0f,
-            carbsPer100g = 0f
+            russianName = entity.russianName
         )
 
         return Meal(
@@ -26,7 +22,13 @@ object MealMapper {
             calories = entity.calories,
             protein = entity.protein,
             fat = entity.fat,
+            saturatedFat = entity.saturatedFat,
             carbs = entity.carbs,
+            fiber = entity.fiber,
+            sugar = entity.sugar,
+            sodium = entity.sodium,
+            potassium = entity.potassium,
+            cholesterol = entity.cholesterol,
             imagePath = entity.imagePath,
             timestamp = entity.timestamp
         )
@@ -42,7 +44,13 @@ object MealMapper {
             calories = meal.calories,
             protein = meal.protein,
             fat = meal.fat,
+            saturatedFat = meal.saturatedFat,
             carbs = meal.carbs,
+            fiber = meal.fiber,
+            sugar = meal.sugar,
+            sodium = meal.sodium,
+            potassium = meal.potassium,
+            cholesterol = meal.cholesterol,
             imagePath = meal.imagePath,
             timestamp = meal.timestamp,
             date = Date(meal.timestamp)
