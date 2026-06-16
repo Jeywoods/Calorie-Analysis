@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jeywoods.foodcalorieanalyzer.domain.model.PredictionItem
-import com.jeywoods.foodcalorieanalyzer.ui.theme.ConfirmedGreen
 import com.jeywoods.foodcalorieanalyzer.ui.theme.*
+import java.util.Locale
 
 @Composable
 fun PredictionCard(
@@ -24,82 +24,52 @@ fun PredictionCard(
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             else
                 MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = prediction.foodItem.russianName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = prediction.foodItem.englishName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = prediction.foodItem.russianName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text = prediction.confidencePercent,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (prediction.isHighConfidence)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
-                    Text(
-                        text = prediction.foodItem.englishName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    LinearProgressIndicator(
+                        progress = { prediction.confidence },
+                        modifier = Modifier.weight(1f).height(6.dp),
+                        color = if (prediction.isHighConfidence)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                     )
                 }
-
-                RadioButton(
-                    selected = isSelected,
-                    onClick = onClick
-                )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Confidence bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = prediction.confidencePercent,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = if (prediction.isHighConfidence) ConfirmedGreen else Warning
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                LinearProgressIndicator(
-                    progress = { prediction.confidence },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(8.dp),
-                    color = if (prediction.isHighConfidence) ConfirmedGreen else Warning,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Mini nutrition table
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                MiniNutritionItem("Ккал", "${prediction.foodItem.caloriesPer100g.toInt()}", CaloriesColor)
-                MiniNutritionItem("Б", "${String.format("%.1f", prediction.foodItem.proteinPer100g)}г", ProteinColor)
-                MiniNutritionItem("Ж", "${String.format("%.1f", prediction.foodItem.fatPer100g)}г", FatColor)
-                MiniNutritionItem("У", "${String.format("%.1f", prediction.foodItem.carbsPer100g)}г", CarbsColor)
-            }
-
-            Text(
-                text = "на 100г",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.align(Alignment.End),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
+            RadioButton(selected = isSelected, onClick = onClick)
         }
     }
 }
