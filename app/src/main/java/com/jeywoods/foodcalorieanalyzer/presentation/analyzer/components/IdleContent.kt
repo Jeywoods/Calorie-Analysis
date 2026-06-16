@@ -1,83 +1,192 @@
 package com.jeywoods.foodcalorieanalyzer.presentation.analyzer.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.jeywoods.foodcalorieanalyzer.ui.theme.Primary
+import androidx.compose.ui.unit.sp
+import com.jeywoods.foodcalorieanalyzer.ui.theme.*
 
 @Composable
 fun IdleContent(onTakePhoto: () -> Unit, onChooseFromGallery: () -> Unit) {
+    val tip = remember { NutritionTips.random() }
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Background)
+            .padding(horizontal = 16.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Сфотографируйте блюдо", style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Мы определим что это за блюдо и посчитаем калории", style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f), textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(48.dp))
-
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
-            shape = MaterialTheme.shapes.large
+            onClick = onTakePhoto,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Primary),
+            elevation = CardDefaults.cardElevation(0.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text("Как это работает", style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                Spacer(modifier = Modifier.height(16.dp))
-                HowItWorksStep("1", "Сделайте фото", "Сфотографируйте блюдо или выберите из галереи")
-                Spacer(modifier = Modifier.height(12.dp))
-                HowItWorksStep("2", "Подтвердите блюдо", "Выберите правильный вариант из предложенных")
-                Spacer(modifier = Modifier.height(12.dp))
-                HowItWorksStep("3", "Укажите вес", "Введите граммовку и добавьте в дневник")
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                // Декоративные круги
+                Box(
+                    modifier = Modifier
+                        .size(220.dp)
+                        .offset(x = 60.dp, y = (-40).dp)
+                        .align(Alignment.TopEnd)
+                        .background(
+                            Color.White.copy(alpha = 0.06f),
+                            shape = CircleShape
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .size(140.dp)
+                        .offset(x = (-20).dp, y = 20.dp)
+                        .align(Alignment.BottomStart)
+                        .background(
+                            Color.White.copy(alpha = 0.05f),
+                            shape = CircleShape
+                        )
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .background(
+                                Color.White.copy(alpha = 0.18f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.CameraAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = Color.White
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Камера",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Сделать фото блюда",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.72f)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // Карточка — Галерея
+        Card(
+            onClick = onChooseFromGallery,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Surface),
+            border = BorderStroke(1.5.dp, DividerColor),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                // Декоративный круг
+                Box(
+                    modifier = Modifier
+                        .size(180.dp)
+                        .offset(x = 50.dp, y = (-50).dp)
+                        .align(Alignment.TopEnd)
+                        .background(Background, shape = CircleShape)
+                )
 
-        Button(onClick = onTakePhoto, modifier = Modifier.fillMaxWidth().height(52.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Primary), shape = MaterialTheme.shapes.medium) {
-            Icon(Icons.Default.CameraAlt, null, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Камера", style = MaterialTheme.typography.titleMedium)
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedButton(onClick = onChooseFromGallery, modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = MaterialTheme.shapes.medium) {
-            Icon(Icons.Default.PhotoLibrary, null, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Галерея", style = MaterialTheme.typography.titleMedium)
-        }
-    }
-}
-
-@Composable
-fun HowItWorksStep(number: String, title: String, description: String) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-        Surface(modifier = Modifier.size(28.dp), shape = MaterialTheme.shapes.small, color = Primary) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(number, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .background(PrimaryContainer, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.PhotoLibrary,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = PrimaryDark
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Галерея",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = OnBackground
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Выбрать из галереи",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = OnSurfaceLight
+                    )
+                }
             }
         }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer)
-            Text(description, style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
+
+            // Совет
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Surface),
+                border = BorderStroke(1.5.dp, DividerColor),
+                elevation = CardDefaults.cardElevation(0.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,  // ← центр по вертикали
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = PrimaryDark
+                    )
+                    Text(
+                        tip,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = OnSurface,
+                        lineHeight = 20.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
     }
-}
