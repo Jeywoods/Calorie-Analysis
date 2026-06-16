@@ -19,9 +19,6 @@ interface MealDao {
     @Update
     suspend fun updateMeal(meal: MealEntity)
 
-    @Query("UPDATE meals SET grams = :grams WHERE id = :mealId")
-    suspend fun updateGrams(mealId: Long, grams: Float)
-
     @Delete
     suspend fun deleteMeal(meal: MealEntity)
 

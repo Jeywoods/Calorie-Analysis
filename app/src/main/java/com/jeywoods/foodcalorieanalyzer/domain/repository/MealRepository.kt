@@ -9,7 +9,7 @@ interface MealRepository {
     fun getMealsByDate(date: Date): Flow<List<Meal>>
     fun getMealsByDateRange(startDate: Date, endDate: Date): Flow<List<Meal>>
     suspend fun addMeal(meal: Meal): Long
-    suspend fun updateMealGrams(mealId: Long, grams: Float)
+    suspend fun updateMeal(meal: Meal)
     suspend fun deleteMeal(mealId: Long)
     fun getDailySummary(date: Date): Flow<DailySummary>
     suspend fun getMealById(id: Long): Meal?

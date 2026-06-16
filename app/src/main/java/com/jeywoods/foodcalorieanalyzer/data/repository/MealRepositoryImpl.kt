@@ -35,22 +35,6 @@ class MealRepositoryImpl @Inject constructor(
         return mealDao.insertMeal(entity)
     }
 
-    override suspend fun updateMealGrams(mealId: Long, grams: Float) {
-        val entity = mealDao.getMealById(mealId) ?: return
-        val meal = MealMapper.toDomain(entity)
-        val nutrition = meal.foodItem.calculateNutrition(grams)
-
-        val updatedEntity = entity.copy(
-            grams = grams,
-            calories = nutrition.calories,
-            protein = nutrition.protein,
-            fat = nutrition.fat,
-            carbs = nutrition.carbs
-        )
-
-        mealDao.updateMeal(updatedEntity)
-    }
-
     override suspend fun deleteMeal(mealId: Long) {
         mealDao.deleteMealById(mealId)
     }
@@ -65,5 +49,8 @@ class MealRepositoryImpl @Inject constructor(
     override suspend fun getMealById(id: Long): Meal? {
         val entity = mealDao.getMealById(id) ?: return null
         return MealMapper.toDomain(entity)
+    }
+    override suspend fun updateMeal(meal: Meal) {
+        mealDao.updateMeal(MealMapper.toEntity(meal))
     }
 }

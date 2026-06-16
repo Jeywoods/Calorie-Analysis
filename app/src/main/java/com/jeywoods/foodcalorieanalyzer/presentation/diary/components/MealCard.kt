@@ -2,37 +2,24 @@ package com.jeywoods.foodcalorieanalyzer.presentation.diary.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeywoods.foodcalorieanalyzer.domain.model.Meal
 import com.jeywoods.foodcalorieanalyzer.ui.theme.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -44,25 +31,18 @@ fun MealCard(
     meal: Meal,
     onGramsChanged: (Float) -> Unit,
     onDelete: () -> Unit,
+    onEditingChanged: (Boolean) -> Unit = {},
+    onError: (String) -> Unit = {},
     listState: LazyListState? = null,
     itemIndex: Int = -1
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var gramsText by remember(meal.grams) { mutableStateOf(meal.grams.toInt().toString()) }
-    val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
 
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.US) }
     val mealTime = remember(meal.timestamp) { timeFormat.format(Date(meal.timestamp)) }
-
-    // Автофокус при входе в режим редактирования
-    LaunchedEffect(isEditing) {
-        if (isEditing) {
-            delay(300) // ждём анимацию
-            focusRequester.requestFocus()
-        }
-    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -74,242 +54,151 @@ fun MealCard(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
 
-            // — Header row —
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // Thumbnail
-                if (meal.imagePath != null && File(meal.imagePath).exists()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(File(meal.imagePath)).crossfade(true).build(),
-                        contentDescription = meal.foodItem.russianName,
-                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(10.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(PrimaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) { Text("🍽", fontSize = 22.sp) }
-                }
-
-                // Name + meta
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        meal.foodItem.russianName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        "${meal.grams.toInt()} г · $mealTime",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-
-                // Calories
-                Text(
-                    text = "${meal.calories.toInt()} ккал",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Primary
-                )
-            }
+            MealHeader(meal, mealTime)
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // — Macro pills row —
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                MacroPill("белки",   String.format(Locale.US, "%.1f г", meal.protein), ProteinColor, Modifier.weight(1f))
-                MacroPill("жиры",   String.format(Locale.US, "%.1f г", meal.fat),     FatColor,     Modifier.weight(1f))
-                MacroPill("углев.", String.format(Locale.US, "%.1f г", meal.carbs),   CarbsColor,   Modifier.weight(1f))
-            }
+            MacroPillsRow(meal)
 
-            // — Expandable details —
-            TextButton(
-                onClick = { expanded = !expanded },
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = if (expanded) "Скрыть детали ▲" else "Подробнее ▼",
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-
-            AnimatedVisibility(visible = expanded) {
-                Column {
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        ExtraTag(
-                            "клетчатка",
-                            if (meal.fiber > 0) String.format(Locale.US, "%.1f г", meal.fiber) else "—",
-                            Modifier.weight(1f)
-                        )
-                        ExtraTag(
-                            "сахар",
-                            if (meal.sugar > 0) String.format(Locale.US, "%.1f г", meal.sugar) else "—",
-                            Modifier.weight(1f)
-                        )
-                        ExtraTag(
-                            "натрий",
-                            if (meal.sodium > 0) String.format(Locale.US, "%.0f мг", meal.sodium) else "—",
-                            Modifier.weight(1f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        ExtraTag(
-                            "нас. жиры",
-                            if (meal.saturatedFat > 0) String.format(Locale.US, "%.1f г", meal.saturatedFat) else "—",
-                            Modifier.weight(1f)
-                        )
-                        ExtraTag(
-                            "калий",
-                            if (meal.potassium > 0) String.format(Locale.US, "%.0f мг", meal.potassium) else "—",
-                            Modifier.weight(1f)
-                        )
-                        ExtraTag(
-                            "холестерин",
-                            if (meal.cholesterol > 0) String.format(Locale.US, "%.0f мг", meal.cholesterol) else "—",
-                            Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
+            ExpandableDetails(expanded = expanded, onToggle = { expanded = !expanded }, meal = meal)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // — Actions row —
+            MealActions(
+                isEditing = isEditing,
+                gramsText = gramsText,
+                onGramsTextChanged = { gramsText = it },
+                onEditClick = {
+                    onEditingChanged(true)
+                    coroutineScope.launch {
+                        if (itemIndex >= 0) {
+                            listState?.animateScrollToItem(itemIndex, scrollOffset = -200)
+                        }
+                        isEditing = true
+                    }
+                },
+                onSaveClick = { grams ->
+                    onGramsChanged(grams)
+                    onEditingChanged(false)
+                    isEditing = false
+                },
+                onValidationError = { onError("Вес не может быть 0") },
+                onDelete = onDelete
+            )
+        }
+    }
+}
+
+@Composable
+private fun MealHeader(meal: Meal, mealTime: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        MealThumbnail(meal)
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                meal.foodItem.russianName,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "${meal.grams.toInt()} г · $mealTime",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
+
+        Text(
+            text = "${meal.calories.toInt()} ккал",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Primary
+        )
+    }
+}
+
+@Composable
+private fun MealThumbnail(meal: Meal) {
+    if (meal.imagePath != null && File(meal.imagePath).exists()) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(File(meal.imagePath)).crossfade(true).build(),
+            contentDescription = meal.foodItem.russianName,
+            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(10.dp)),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(PrimaryContainer),
+            contentAlignment = Alignment.Center
+        ) { Text("🍽", fontSize = 22.sp) }
+    }
+}
+
+@Composable
+private fun MacroPillsRow(meal: Meal) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        MacroPill("белки",   String.format(Locale.US, "%.1f г", meal.protein), ProteinColor, Modifier.weight(1f))
+        MacroPill("жиры",   String.format(Locale.US, "%.1f г", meal.fat),     FatColor,     Modifier.weight(1f))
+        MacroPill("углев.", String.format(Locale.US, "%.1f г", meal.carbs),   CarbsColor,   Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun ExpandableDetails(
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    meal: Meal
+) {
+    TextButton(
+        onClick = onToggle,
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(
+            text = if (expanded) "Скрыть детали ▲" else "Подробнее ▼",
+            style = MaterialTheme.typography.labelMedium
+        )
+    }
+
+    AnimatedVisibility(visible = expanded) {
+        Column {
+            Spacer(modifier = Modifier.height(6.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                AnimatedVisibility(visible = isEditing) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(44.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            BasicTextField(
-                                value = gramsText,
-                                onValueChange = { v ->
-                                    if (v.all { it.isDigit() } && v.length <= 4) gramsText = v
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp)
-                                    .focusRequester(focusRequester),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                singleLine = true,
-                                textStyle = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center
-                                ),
-                                decorationBox = { innerTextField ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        innerTextField()
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                                    }
-                                }
-                            )
-                        }
-                        Button(
-                            onClick = {
-                                val grams = gramsText.toFloatOrNull() ?: meal.grams
-                                onGramsChanged(grams)
-                                isEditing = false
-                            },
-                            modifier = Modifier.weight(1f).height(44.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Primary)
-                        ) {
-                            Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text("Сохранить", style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-                }
+                ExtraTag("клетчатка", if (meal.fiber > 0) String.format(Locale.US, "%.1f г", meal.fiber) else "—", Modifier.weight(1f))
+                ExtraTag("сахар", if (meal.sugar > 0) String.format(Locale.US, "%.1f г", meal.sugar) else "—", Modifier.weight(1f))
+                ExtraTag("натрий", if (meal.sodium > 0) String.format(Locale.US, "%.0f мг", meal.sodium) else "—", Modifier.weight(1f))
+            }
 
-                AnimatedVisibility(visible = !isEditing) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                isEditing = true
-                                coroutineScope.launch {
-                                    if (itemIndex >= 0) {
-                                        listState?.animateScrollToItem(itemIndex, scrollOffset = 400)
-                                    }
-                                }
-                            },
-                            modifier = Modifier.weight(1f).height(44.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(18.dp))
-                            Text("Изменить вес", style = MaterialTheme.typography.labelLarge)
-                        }
+            Spacer(modifier = Modifier.height(5.dp))
 
-                        Button(
-                            onClick = onDelete,
-                            modifier = Modifier.weight(1f).height(44.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Icon(Icons.Outlined.Delete, null, modifier = Modifier.size(18.dp))
-                            Text("Удалить", style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                ExtraTag("нас. жиры", if (meal.saturatedFat > 0) String.format(Locale.US, "%.1f г", meal.saturatedFat) else "—", Modifier.weight(1f))
+                ExtraTag("калий", if (meal.potassium > 0) String.format(Locale.US, "%.0f мг", meal.potassium) else "—", Modifier.weight(1f))
+                ExtraTag("холестерин", if (meal.cholesterol > 0) String.format(Locale.US, "%.0f мг", meal.cholesterol) else "—", Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-private fun MacroPill(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
+fun MacroPill(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
@@ -323,7 +212,7 @@ private fun MacroPill(label: String, value: String, color: Color, modifier: Modi
 }
 
 @Composable
-private fun ExtraTag(label: String, value: String, modifier: Modifier = Modifier) {
+fun ExtraTag(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(6.dp))
