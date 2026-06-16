@@ -43,6 +43,9 @@ class HistoryViewModel @Inject constructor(
 
     fun onDateSelected(date: Date) {
         viewModelScope.launch {
+            _uiState.update { state ->
+                state.copy(selectedDate = date)  // ← добавить обновление selectedDate
+            }
             getDailyMealsUseCase(date).collect { meals ->
                 _uiState.update { state ->
                     state.copy(selectedDayMeals = meals)
@@ -84,6 +87,7 @@ class HistoryViewModel @Inject constructor(
 
 data class HistoryUiState(
     val dailySummaries: List<DailySummary> = emptyList(),
+    val selectedDate: Date? = null,
     val selectedDayMeals: List<Meal> = emptyList(),
     val isLoading: Boolean = true,
     val isExporting: Boolean = false,
