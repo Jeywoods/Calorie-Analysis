@@ -1,62 +1,47 @@
 package com.jeywoods.foodcalorieanalyzer.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryLight,
-    onPrimary = SurfaceLight,
+    primary = Primary,
+    onPrimary = Color.White,
     primaryContainer = PrimaryContainer,
-    secondary = SecondaryLight,
-    onSecondary = SurfaceLight,
+    onPrimaryContainer = OnPrimaryContainer,
+    secondary = Secondary,
+    onSecondary = Color.White,
     secondaryContainer = SecondaryContainer,
-    background = BackgroundLight,
-    onBackground = SurfaceDark,
-    surface = SurfaceLight,
-    onSurface = SurfaceDark,
+    background = Background,
+    onBackground = OnBackground,
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceVariant,
+    outline = DividerColor,
     error = Error,
-    onError = SurfaceLight
-)
-
-private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryDark,
-    onPrimary = SurfaceLight,
-    primaryContainer = PrimaryContainer,
-    secondary = SecondaryDark,
-    onSecondary = SurfaceLight,
-    secondaryContainer = SecondaryContainer,
-    background = BackgroundDark,
-    onBackground = SurfaceLight,
-    surface = SurfaceDark,
-    onSurface = SurfaceLight,
-    error = Error,
-    onError = SurfaceLight
+    errorContainer = ErrorContainer,
+    onError = Color.White
 )
 
 @Composable
 fun FoodAnalyzerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
         content = content
     )
