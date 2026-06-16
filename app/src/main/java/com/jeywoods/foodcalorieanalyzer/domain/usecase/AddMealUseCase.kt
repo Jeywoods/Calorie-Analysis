@@ -1,6 +1,5 @@
 package com.jeywoods.foodcalorieanalyzer.domain.usecase
 
-import android.util.Log
 import com.jeywoods.foodcalorieanalyzer.domain.model.FoodItem
 import com.jeywoods.foodcalorieanalyzer.domain.model.Meal
 import com.jeywoods.foodcalorieanalyzer.domain.repository.MealRepository
@@ -14,13 +13,7 @@ class AddMealUseCase @Inject constructor(
         grams: Float,
         imagePath: String?
     ): Long {
-        Log.d("AddMealUC", "=== Adding meal ===")
-        Log.d("AddMealUC", "Food: ${foodItem.russianName} (id=${foodItem.id})")
-        Log.d("AddMealUC", "Grams: $grams")
-        Log.d("AddMealUC", "ImagePath: $imagePath")
-
         val nutrition = foodItem.calculateNutrition(grams)
-        Log.d("AddMealUC", "Calculated: ${nutrition.calories}kcal, P:${nutrition.protein}, F:${nutrition.fat}, C:${nutrition.carbs}")
 
         val meal = Meal(
             foodItem = foodItem,
@@ -28,15 +21,17 @@ class AddMealUseCase @Inject constructor(
             calories = nutrition.calories,
             protein = nutrition.protein,
             fat = nutrition.fat,
+            saturatedFat = nutrition.saturatedFat,
             carbs = nutrition.carbs,
+            fiber = nutrition.fiber,
+            sugar = nutrition.sugar,
+            sodium = nutrition.sodium,
+            potassium = nutrition.potassium,
+            cholesterol = nutrition.cholesterol,
             imagePath = imagePath,
             timestamp = System.currentTimeMillis()
         )
 
-        Log.d("AddMealUC", "Calling mealRepository.addMeal()")
-        val mealId = mealRepository.addMeal(meal)
-        Log.d("AddMealUC", "Meal saved with ID: $mealId")
-
-        return mealId
+        return mealRepository.addMeal(meal)
     }
 }
