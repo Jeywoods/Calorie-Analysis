@@ -13,7 +13,7 @@ import com.jeywoods.foodcalorieanalyzer.data.local.entity.MealEntity
         MealEntity::class,
         ClassificationCacheEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
