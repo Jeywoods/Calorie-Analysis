@@ -8,7 +8,7 @@ class GetTopPredictionsUseCase @Inject constructor() {
 
     operator fun invoke(classificationResult: ClassificationResult): List<PredictionItem> {
         return classificationResult.predictions
-            .take(3)
+            .take(5)
             .mapIndexed { index, prediction ->
                 PredictionItem(
                     foodItem = prediction.foodItem,
