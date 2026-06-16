@@ -20,7 +20,13 @@ sealed interface AnalyzerUiState {
         val calculatedCalories: Float,
         val calculatedProtein: Float,
         val calculatedFat: Float,
-        val calculatedCarbs: Float
+        val calculatedSaturatedFat: Float = 0f,
+        val calculatedCarbs: Float,
+        val calculatedFiber: Float = 0f,
+        val calculatedSugar: Float = 0f,
+        val calculatedSodium: Float = 0f,
+        val calculatedPotassium: Float = 0f,
+        val calculatedCholesterol: Float = 0f
     ) : AnalyzerUiState
 
     data class MealAdded(val mealId: Long) : AnalyzerUiState
