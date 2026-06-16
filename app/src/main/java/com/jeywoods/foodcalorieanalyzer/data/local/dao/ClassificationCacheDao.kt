@@ -2,7 +2,6 @@ package com.jeywoods.foodcalorieanalyzer.data.local.dao
 
 import androidx.room.*
 import com.jeywoods.foodcalorieanalyzer.data.local.entity.ClassificationCacheEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ClassificationCacheDao {
