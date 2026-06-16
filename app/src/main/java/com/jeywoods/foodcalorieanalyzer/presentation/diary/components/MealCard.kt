@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +32,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeywoods.foodcalorieanalyzer.domain.model.Meal
 import com.jeywoods.foodcalorieanalyzer.ui.theme.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,14 +43,26 @@ import java.util.*
 fun MealCard(
     meal: Meal,
     onGramsChanged: (Float) -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    listState: LazyListState? = null,
+    itemIndex: Int = -1
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var gramsText by remember(meal.grams) { mutableStateOf(meal.grams.toInt().toString()) }
+    val focusRequester = remember { FocusRequester() }
+    val coroutineScope = rememberCoroutineScope()
 
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.US) }
     val mealTime = remember(meal.timestamp) { timeFormat.format(Date(meal.timestamp)) }
+
+    // Автофокус при входе в режим редактирования
+    LaunchedEffect(isEditing) {
+        if (isEditing) {
+            delay(300) // ждём анимацию
+            focusRequester.requestFocus()
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -133,7 +150,6 @@ fun MealCard(
                 Column {
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // — Extra nutrients (row 1) — always 3 blocks —
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -157,7 +173,6 @@ fun MealCard(
 
                     Spacer(modifier = Modifier.height(5.dp))
 
-                    // — Extra nutrients (row 2) — always 3 blocks —
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -210,7 +225,8 @@ fun MealCard(
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp),
+                                    .padding(horizontal = 12.dp)
+                                    .focusRequester(focusRequester),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 textStyle = TextStyle(
@@ -254,7 +270,14 @@ fun MealCard(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
-                            onClick = { isEditing = true },
+                            onClick = {
+                                isEditing = true
+                                coroutineScope.launch {
+                                    if (itemIndex >= 0) {
+                                        listState?.animateScrollToItem(itemIndex, scrollOffset = 400)
+                                    }
+                                }
+                            },
                             modifier = Modifier.weight(1f).height(44.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(

@@ -35,9 +35,9 @@ fun DailySummaryCard(summary: DailySummary) {
                 color = Color.White.copy(alpha = 0.7f)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            // Калории по центру крупно
+            // Калории по центру
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -45,7 +45,7 @@ fun DailySummaryCard(summary: DailySummary) {
             ) {
                 Text(
                     "${summary.totalCalories.toInt()}",
-                    style = MaterialTheme.typography.displaySmall,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -54,16 +54,16 @@ fun DailySummaryCard(summary: DailySummary) {
                     "ккал",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(bottom = 6.dp)
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // 4 блока Б/Ж/У
+            // Блоки Б/Ж/У
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 MacroBox("Белки", summary.totalProtein, Modifier.weight(1f))
                 MacroBox("Жиры", summary.totalFat, Modifier.weight(1f))
@@ -86,8 +86,6 @@ fun DailySummaryCard(summary: DailySummary) {
             // Детали
             AnimatedVisibility(visible = expanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Spacer(modifier = Modifier.height(4.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -96,10 +94,9 @@ fun DailySummaryCard(summary: DailySummary) {
                         DetailBox("Клетчатка", summary.totalFiber, "г", Modifier.weight(1f))
                         DetailBox("Сахар", summary.totalSugar, "г", Modifier.weight(1f))
                     }
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         DetailBox("Натрий", summary.totalSodium, "мг", Modifier.weight(1f))
                         DetailBox("Калий", summary.totalPotassium, "мг", Modifier.weight(1f))
@@ -108,9 +105,9 @@ fun DailySummaryCard(summary: DailySummary) {
                 }
             }
 
-            // Количество блюд внизу справа
+            // Количество блюд
             if (summary.mealCount > 0) {
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     "Блюд: ${summary.mealCount}",
                     style = MaterialTheme.typography.labelSmall,
@@ -137,13 +134,20 @@ private fun MacroBox(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                String.format(Locale.US, "%.1f", value),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Text("г", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    String.format(Locale.US, "%.1f", value),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    "г",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+            }
             Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.65f))
         }
     }

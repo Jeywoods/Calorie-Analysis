@@ -2,7 +2,8 @@ package com.jeywoods.foodcalorieanalyzer.presentation.diary.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +18,8 @@ fun DiaryContent(
     onDeleteMeal: (Meal) -> Unit,
     onNavigateToAnalyzer: () -> Unit
 ) {
+    val listState = rememberLazyListState()
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Итоговая сводка за день
         uiState.dailySummary?.let { summary ->
@@ -25,6 +28,7 @@ fun DiaryContent(
 
         // Список приёмов пищи
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -40,16 +44,18 @@ fun DiaryContent(
                 )
             }
 
-            items(
+            itemsIndexed(
                 items = uiState.meals,
-                key = { it.id }
-            ) { meal ->
+                key = { _, meal -> meal.id }
+            ) { index, meal ->
                 MealCard(
                     meal = meal,
                     onGramsChanged = { newGrams ->
                         onGramsChanged(meal.id, newGrams)
                     },
-                    onDelete = { onDeleteMeal(meal) }
+                    onDelete = { onDeleteMeal(meal) },
+                    listState = listState,
+                    itemIndex = index + 1
                 )
             }
         }
