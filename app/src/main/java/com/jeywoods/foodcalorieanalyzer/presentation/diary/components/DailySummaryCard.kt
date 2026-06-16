@@ -9,8 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jeywoods.foodcalorieanalyzer.domain.model.DailySummary
@@ -24,142 +22,98 @@ fun DailySummaryCard(summary: DailySummary) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = bgColor)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
+
+            // Заголовок
             Text(
                 "Итого за день",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.6f),
-                letterSpacing = TextUnit(0.06f, TextUnitType.Em)
+                color = Color.White.copy(alpha = 0.7f)
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Основные показатели: калории + БЖУ
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SummaryBox(
-                    label = "Калории",
-                    value = "${summary.totalCalories.toInt()}",
-                    unit = "ккал",
-                    modifier = Modifier.weight(1f)
-                )
-                SummaryBox(
-                    label = "Белки",
-                    value = String.format(Locale.US, "%.1f", summary.totalProtein),
-                    unit = "г",
-                    modifier = Modifier.weight(1f)
-                )
-            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Калории по центру крупно
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    "${summary.totalCalories.toInt()}",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    "ккал",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 4 блока Б/Ж/У
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SummaryBox(
-                    label = "Жиры",
-                    value = String.format(Locale.US, "%.1f", summary.totalFat),
-                    unit = "г",
-                    modifier = Modifier.weight(1f)
-                )
-                SummaryBox(
-                    label = "Углеводы",
-                    value = String.format(Locale.US, "%.1f", summary.totalCarbs),
-                    unit = "г",
-                    modifier = Modifier.weight(1f)
-                )
+                MacroBox("Белки", summary.totalProtein, Modifier.weight(1f))
+                MacroBox("Жиры", summary.totalFat, Modifier.weight(1f))
+                MacroBox("Углеводы", summary.totalCarbs, Modifier.weight(1f))
             }
 
-            // Кнопка раскрытия деталей
+            // Кнопка деталей
             TextButton(
                 onClick = { expanded = !expanded },
                 contentPadding = PaddingValues(0.dp),
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 2.dp)
             ) {
                 Text(
-                    text = if (expanded) "Скрыть детали ▲" else "Все показатели ▼",
+                    text = if (expanded) "Скрыть детали ▲" else "Подробнее ▼",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.6f)
                 )
             }
 
-            // Раскрывающиеся дополнительные показатели
+            // Детали
             AnimatedVisibility(visible = expanded) {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    // Первая строка дополнительных показателей
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        DetailBox(
-                            label = "Клетчатка",
-                            value = if (summary.totalFiber > 0)
-                                String.format(Locale.US, "%.1f", summary.totalFiber) else "—",
-                            unit = "г",
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailBox(
-                            label = "Сахар",
-                            value = if (summary.totalSugar > 0)
-                                String.format(Locale.US, "%.1f", summary.totalSugar) else "—",
-                            unit = "г",
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailBox(
-                            label = "Натрий",
-                            value = if (summary.totalSodium > 0)
-                                String.format(Locale.US, "%.0f", summary.totalSodium) else "—",
-                            unit = "мг",
-                            modifier = Modifier.weight(1f)
-                        )
+                        DetailBox("Нас. жиры", summary.totalSaturatedFat, "г", Modifier.weight(1f))
+                        DetailBox("Клетчатка", summary.totalFiber, "г", Modifier.weight(1f))
+                        DetailBox("Сахар", summary.totalSugar, "г", Modifier.weight(1f))
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // Вторая строка дополнительных показателей
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        DetailBox(
-                            label = "Нас. жиры",
-                            value = if (summary.totalSaturatedFat > 0)
-                                String.format(Locale.US, "%.1f", summary.totalSaturatedFat) else "—",
-                            unit = "г",
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailBox(
-                            label = "Калий",
-                            value = if (summary.totalPotassium > 0)
-                                String.format(Locale.US, "%.0f", summary.totalPotassium) else "—",
-                            unit = "мг",
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailBox(
-                            label = "Холестерин",
-                            value = if (summary.totalCholesterol > 0)
-                                String.format(Locale.US, "%.0f", summary.totalCholesterol) else "—",
-                            unit = "мг",
-                            modifier = Modifier.weight(1f)
-                        )
+                        DetailBox("Натрий", summary.totalSodium, "мг", Modifier.weight(1f))
+                        DetailBox("Калий", summary.totalPotassium, "мг", Modifier.weight(1f))
+                        DetailBox("Холестерин", summary.totalCholesterol, "мг", Modifier.weight(1f))
                     }
                 }
             }
 
+            // Количество блюд внизу справа
             if (summary.mealCount > 0) {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    "Блюда ${summary.mealCount}",
-                    style = MaterialTheme.typography.bodySmall,
+                    "Блюд: ${summary.mealCount}",
+                    style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.4f),
                     modifier = Modifier.align(Alignment.End)
                 )
@@ -169,39 +123,28 @@ fun DailySummaryCard(summary: DailySummary) {
 }
 
 @Composable
-private fun SummaryBox(
+private fun MacroBox(
     label: String,
-    value: String,
-    unit: String,
+    value: Float,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(12.dp),
         color = Color.White.copy(alpha = 0.12f)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.width(3.dp))
-                Text(
-                    text = unit,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.55f)
-                )
-            }
             Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.55f)
+                String.format(Locale.US, "%.1f", value),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
+            Text("г", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f))
+            Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.65f))
         }
     }
 }
@@ -209,7 +152,7 @@ private fun SummaryBox(
 @Composable
 private fun DetailBox(
     label: String,
-    value: String,
+    value: Float,
     unit: String,
     modifier: Modifier = Modifier
 ) {
@@ -222,23 +165,14 @@ private fun DetailBox(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = unit,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontSize = 10.sp
-                )
-            }
             Text(
-                text = label,
+                text = if (value > 0) "${String.format(Locale.US, "%.1f", value)} $unit" else "—",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = Color.White
+            )
+            Text(
+                label,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.5f),
                 fontSize = 10.sp
