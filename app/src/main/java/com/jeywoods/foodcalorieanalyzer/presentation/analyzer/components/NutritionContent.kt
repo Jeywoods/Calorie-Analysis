@@ -58,7 +58,7 @@ fun NutritionContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "Порция и питательность",
+                        "Настройка блюда",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
