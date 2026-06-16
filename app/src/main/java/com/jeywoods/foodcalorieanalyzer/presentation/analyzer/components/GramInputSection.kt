@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +28,6 @@ fun GramInputSection(
     modifier: Modifier = Modifier,
     onGramsChanged: (Float) -> Unit,
     initialGrams: Float = 0f
-
 ) {
     val quickOptions = listOf(
         GramOption(100f, "100"),
@@ -38,34 +38,43 @@ fun GramInputSection(
     )
 
     var selectedGrams by remember { mutableFloatStateOf(initialGrams) }
-    var customGrams by remember { mutableStateOf("") }
-    var showCustomInput by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
+    var showCustomDialog by remember { mutableStateOf(false) }
 
     fun selectGrams(grams: Float) {
         selectedGrams = grams
-        customGrams = ""
-        showCustomInput = false
         onGramsChanged(grams)
     }
 
     Column(modifier = modifier) {
-        Text(
-            text = "Вес порции",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Вес порции",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            if (selectedGrams > 0) {
+                Text(
+                    text = "${selectedGrams.toInt()} г",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Кнопки быстрого выбора
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             quickOptions.forEach { option ->
-                val isSelected = selectedGrams == option.grams && !showCustomInput
+                val isSelected = selectedGrams == option.grams
 
                 FilterChip(
                     selected = isSelected,
@@ -93,53 +102,70 @@ fun GramInputSection(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Кастомный ввод
-        if (showCustomInput) {
-            OutlinedTextField(
-                value = customGrams,
-                onValueChange = { newValue ->
-                    if (newValue.all { it.isDigit() } && newValue.length <= 4) {
-                        customGrams = newValue
-                        val grams = newValue.toFloatOrNull() ?: 0f
+        TextButton(
+            onClick = { showCustomDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                Icons.Default.Edit,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = if (selectedGrams > 0) "Другой вес..." else "Ввести вручную",
+                fontSize = 13.sp
+            )
+        }
+    }
+
+    if (showCustomDialog) {
+        var customGrams by remember { mutableStateOf("") }
+        val focusManager = LocalFocusManager.current
+
+        AlertDialog(
+            onDismissRequest = { showCustomDialog = false },
+            title = { Text("Вес порции") },
+            text = {
+                OutlinedTextField(
+                    value = customGrams,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() } && newValue.length <= 4) {
+                            customGrams = newValue
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Введите вес в граммах") },
+                    suffix = { Text("г") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { focusManager.clearFocus() }
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val grams = customGrams.toFloatOrNull() ?: 0f
                         if (grams > 0) {
-                            selectedGrams = grams
-                            onGramsChanged(grams)
+                            selectGrams(grams)
+                            showCustomDialog = false
                         }
                     }
-                },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),  // ← Минимальная высота
-                placeholder = { Text("Введите вес в граммах") },
-                suffix = { Text("г") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
-                ),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                )
-            )
-        } else {
-            TextButton(
-                onClick = { showCustomInput = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = if (selectedGrams > 0) "Другой вес..." else "Ввести вручную",
-                    fontSize = 13.sp
-                )
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCustomDialog = false }) {
+                    Text("Отмена")
+                }
             }
-        }
+        )
     }
 }
