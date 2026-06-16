@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronLeft
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,212 +19,208 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jeywoods.foodcalorieanalyzer.domain.model.DailySummary
-import com.jeywoods.foodcalorieanalyzer.ui.theme.*
+import com.jeywoods.foodcalorieanalyzer.ui.theme.Primary
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 @Composable
 fun CalorieCalendar(
     dailySummaries: List<DailySummary>,
     selectedDate: Date?,
-    onDateSelected: (Date) -> Unit,
-    modifier: Modifier = Modifier
+    onDateSelected: (Date) -> Unit
 ) {
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    val monthFormat = SimpleDateFormat("LLLL yyyy", Locale("ru"))
+    var currentMonth by remember { mutableStateOf(Calendar.getInstance()) }
 
-    val today = Calendar.getInstance()
-    val startCal = Calendar.getInstance().apply {
-        add(Calendar.DAY_OF_YEAR, -30)
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }
-
-    // Create list of days
-    val days = mutableListOf<Date>()
-    val tempCal = Calendar.getInstance().apply {
-        time = startCal.time
-    }
-
-    for (i in 0..30) {
-        days.add(tempCal.time)
-        tempCal.add(Calendar.DAY_OF_YEAR, 1)
-    }
-
-    // Group into weeks
-    val firstDayCal = Calendar.getInstance().apply {
-        time = days.first()
-    }
-    val firstDayOfWeek = (firstDayCal.get(Calendar.DAY_OF_WEEK) + 5) % 7 // Monday = 0
-
-    val weeks = mutableListOf<List<Date?>>()
-    var currentWeek = mutableListOf<Date?>()
-
-    // Add padding for first week
-    repeat(firstDayOfWeek) {
-        currentWeek.add(null)
-    }
-
-    days.forEach { date ->
-        currentWeek.add(date)
-        if (currentWeek.size == 7) {
-            weeks.add(currentWeek.toList())
-            currentWeek = mutableListOf()
-        }
-    }
-
-    if (currentWeek.isNotEmpty()) {
-        while (currentWeek.size < 7) {
-            currentWeek.add(null)
-        }
-        weeks.add(currentWeek)
-    }
-
-    Column(modifier = modifier.padding(16.dp)) {
-        // Month header
-        Text(
-            text = monthFormat.format(startCal.time).replaceFirstChar {
-                if (it.isLowerCase()) it.titlecase(Locale("ru")) else it.toString()
-            },
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Day of week headers
-        Row(modifier = Modifier.fillMaxWidth()) {
-            listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { day ->
-                Text(
-                    text = day,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+    val summaryMap = remember(dailySummaries) {
+        dailySummaries.associateBy { summary ->
+            Calendar.getInstance().apply {
+                timeInMillis = try {
+                    summary.date.toLong()
+                } catch (e: NumberFormatException) {
+                    SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(summary.date)!!.time
+                }
+            }.let {
+                Triple(it.get(Calendar.YEAR), it.get(Calendar.MONTH), it.get(Calendar.DAY_OF_MONTH))
             }
         }
+    }
 
-        Spacer(modifier = Modifier.height(8.dp))
+    val today = remember { Calendar.getInstance() }
 
-        // Calendar grid
-        weeks.forEach { week ->
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(
+            0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+
+            // — Навигация —
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                week.forEach { date ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .padding(2.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (date != null) {
-                            val dateString = dateFormat.format(date)
-                            val summary = dailySummaries.find { it.date == dateString }
-                            val color = getDayColor(summary)
-                            val isSelected = selectedDate != null &&
-                                    dateFormat.format(date) == dateFormat.format(selectedDate)
+                OutlinedButton(
+                    onClick = {
+                        currentMonth = (currentMonth.clone() as Calendar).apply { add(Calendar.MONTH, -1) }
+                    },
+                    modifier = Modifier.size(32.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(Icons.Outlined.ChevronLeft, null, modifier = Modifier.size(16.dp))
+                }
 
-                            val dayCal = Calendar.getInstance().apply { time = date }
-                            val todayCal = Calendar.getInstance()
-                            val isToday = dateFormat.format(date) == dateFormat.format(todayCal.time)
+                Text(
+                    text = buildString {
+                        val monthNames = listOf(
+                            "Январь","Февраль","Март","Апрель","Май","Июнь",
+                            "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
+                        )
+                        append(monthNames[currentMonth.get(Calendar.MONTH)])
+                        append(" ")
+                        append(currentMonth.get(Calendar.YEAR))
+                    },
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
 
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSelected) MaterialTheme.colorScheme.primary
-                                        else color.copy(alpha = 0.3f)
-                                    )
-                                    .clickable { onDateSelected(date) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = dayCal.get(Calendar.DAY_OF_MONTH).toString(),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected)
-                                            MaterialTheme.colorScheme.onPrimary
-                                        else
-                                            MaterialTheme.colorScheme.onSurface
-                                    )
+                OutlinedButton(
+                    onClick = {
+                        currentMonth = (currentMonth.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
+                    },
+                    modifier = Modifier.size(32.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(Icons.Outlined.ChevronRight, null, modifier = Modifier.size(16.dp))
+                }
+            }
 
-                                    if (summary != null) {
-                                        Text(
-                                            text = "${summary.totalCalories.toInt()}",
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                fontSize = 8.sp
-                                            ),
-                                            color = if (isSelected)
-                                                MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                                            else
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                        )
-                                    }
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // — Заголовки дней недели (Пн-Вс) —
+            val weekDays = listOf("Пн","Вт","Ср","Чт","Пт","Сб","Вс")
+            Row(modifier = Modifier.fillMaxWidth()) {
+                weekDays.forEach { day ->
+                    Text(
+                        text = day,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // — Сетка дней —
+            val firstDay = (currentMonth.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 1) }
+            // Конвертируем Sunday=1..Saturday=7 → Mon=0..Sun=6
+            val startOffset = ((firstDay.get(Calendar.DAY_OF_WEEK) - 2 + 7) % 7)
+            val daysInMonth = currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val year = currentMonth.get(Calendar.YEAR)
+            val month = currentMonth.get(Calendar.MONTH)
+
+            val totalCells = startOffset + daysInMonth
+            val rows = (totalCells + 6) / 7
+
+            repeat(rows) { row ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    repeat(7) { col ->
+                        val idx = row * 7 + col
+                        val day = idx - startOffset + 1
+                        if (day < 1 || day > daysInMonth) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        } else {
+                            val key = Triple(year, month, day)
+                            val summary = summaryMap[key]
+                            val isToday = year == today.get(Calendar.YEAR) &&
+                                    month == today.get(Calendar.MONTH) &&
+                                    day == today.get(Calendar.DAY_OF_MONTH)
+                            val isSelected = selectedDate?.let {
+                                val sc = Calendar.getInstance().apply { time = it }
+                                year == sc.get(Calendar.YEAR) &&
+                                        month == sc.get(Calendar.MONTH) &&
+                                        day == sc.get(Calendar.DAY_OF_MONTH)
+                            } ?: false
+
+                            DayCell(
+                                day = day,
+                                isToday = isToday,
+                                isSelected = isSelected,
+                                hasData = summary != null,
+                                calories = summary?.totalCalories?.toInt(),
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    val date = Calendar.getInstance().apply {
+                                        set(year, month, day, 0, 0, 0)
+                                        set(Calendar.MILLISECOND, 0)
+                                    }.time
+                                    onDateSelected(date)
                                 }
-                            }
+                            )
                         }
                     }
                 }
+                if (row < rows - 1) Spacer(modifier = Modifier.height(2.dp))
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Legend
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            LegendItem(color = CalendarGreen, label = "< 1500")
-            LegendItem(color = CalendarYellow, label = "1500-2000")
-            LegendItem(color = CalendarOrange, label = "2000-2500")
-            LegendItem(color = CalendarRed, label = "> 2500")
         }
     }
 }
 
 @Composable
-private fun LegendItem(
-    color: Color,
-    label: String
+private fun DayCell(
+    day: Int,
+    isToday: Boolean,
+    isSelected: Boolean,
+    hasData: Boolean,
+    calories: Int?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall
-        )
+    val bgColor = when {
+        isSelected -> Primary
+        else -> Color.Transparent
     }
-}
+    val numColor = when {
+        isSelected -> Color.White
+        isToday -> Primary
+        else -> MaterialTheme.colorScheme.onSurface
+    }
 
-private fun getDayColor(summary: DailySummary?): Color {
-    if (summary == null || summary.meals.isEmpty()) return CalendarGray
-
-    return when {
-        summary.totalCalories < 1500 -> CalendarGreen
-        summary.totalCalories < 2000 -> CalendarYellow
-        summary.totalCalories < 2500 -> CalendarOrange
-        else -> CalendarRed
+    Column(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(8.dp))
+            .background(bgColor)
+            .clickable(enabled = hasData || isToday, onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = day.toString(),
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = if (isToday || isSelected) FontWeight.Medium else FontWeight.Normal,
+            color = numColor,
+            fontSize = 13.sp
+        )
+        if (hasData && calories != null) {
+            // индикатор-точка
+            Box(
+                modifier = Modifier
+                    .size(4.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) Color.White.copy(alpha = 0.6f) else Primary.copy(alpha = 0.7f)
+                    )
+            )
+        } else {
+            Spacer(modifier = Modifier.size(4.dp))
+        }
     }
 }
