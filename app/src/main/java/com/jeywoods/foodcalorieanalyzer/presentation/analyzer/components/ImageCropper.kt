@@ -75,42 +75,50 @@ fun ImageCropperDialog(
                     Text("Обрежьте изображение", color = Color.White)
                     IconButton(onClick = {
                         Log.d("Cropper", "=== CONFIRM CROP ===")
-                        Log.d("Cropper", "Bitmap: ${bitmap.width}x${bitmap.height}")
-                        Log.d("Cropper", "Canvas: ${canvasSize.width}x${canvasSize.height}")
-                        Log.d("Cropper", "Crop size: $cropDisplaySize")
-                        Log.d("Cropper", "Crop center: $cropCenterX, $cropCenterY")
 
                         if (cropDisplaySize > 0 && canvasSize.width > 0) {
-                            val displayWidth = canvasSize.width.toFloat()
-                            val displayHeight = canvasSize.height.toFloat()
-                            val scaleX = bitmap.width / displayWidth
-                            val scaleY = bitmap.height / displayHeight
-                            val scale = maxOf(scaleX, scaleY)
+                            // Соотношение сторон
+                            val bitmapRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+                            val canvasRatio = canvasSize.width.toFloat() / canvasSize.height.toFloat()
 
-                            val cropOrigSize = (cropDisplaySize * scale).roundToInt()
-                            val cropLeft = ((cropCenterX - cropDisplaySize / 2) * scale).roundToInt()
-                            val cropTop = ((cropCenterY - cropDisplaySize / 2) * scale).roundToInt()
+                            // Вычисляем как изображение вписывается в Canvas (ContentScale.Fit)
+                            val displayWidth: Float
+                            val displayHeight: Float
+                            val offsetX: Float
+                            val offsetY: Float
 
-                            val safeLeft = cropLeft.coerceIn(0, bitmap.width - 1)
-                            val safeTop = cropTop.coerceIn(0, bitmap.height - 1)
-                            val safeWidth = cropOrigSize.coerceIn(1, bitmap.width - safeLeft)
-                            val safeHeight = cropOrigSize.coerceIn(1, bitmap.height - safeTop)
+                            if (bitmapRatio > canvasRatio) {
+                                // Изображение шире — помещается по ширине
+                                displayWidth = canvasSize.width.toFloat()
+                                displayHeight = canvasSize.width.toFloat() / bitmapRatio
+                                offsetX = 0f
+                                offsetY = (canvasSize.height - displayHeight) / 2f
+                            } else {
+                                // Изображение выше — помещается по высоте
+                                displayHeight = canvasSize.height.toFloat()
+                                displayWidth = canvasSize.height.toFloat() * bitmapRatio
+                                offsetX = (canvasSize.width - displayWidth) / 2f
+                                offsetY = 0f
+                            }
 
-                            Log.d("Cropper", "Crop region: $safeLeft,$safeTop ${safeWidth}x${safeHeight}")
+                            // Переводим координаты кропа в координаты оригинального изображения
+                            val scaleX = bitmap.width.toFloat() / displayWidth
+                            val scaleY = bitmap.height.toFloat() / displayHeight
 
-                            val cropped = Bitmap.createBitmap(bitmap, safeLeft, safeTop, safeWidth, safeHeight)
-                            Log.d("Cropper", "Cropped: ${cropped.width}x${cropped.height}")
+                            val cropLeftOnBitmap = ((cropCenterX - cropDisplaySize / 2 - offsetX) * scaleX).roundToInt()
+                            val cropTopOnBitmap = ((cropCenterY - cropDisplaySize / 2 - offsetY) * scaleY).roundToInt()
+                            val cropSizeOnBitmap = (cropDisplaySize * scaleX).roundToInt()
 
+                            // Обрезаем с проверкой границ
+                            val safeLeft = cropLeftOnBitmap.coerceIn(0, bitmap.width - 1)
+                            val safeTop = cropTopOnBitmap.coerceIn(0, bitmap.height - 1)
+                            val safeSize = cropSizeOnBitmap.coerceIn(1, minOf(bitmap.width - safeLeft, bitmap.height - safeTop))
+
+                            val cropped = Bitmap.createBitmap(bitmap, safeLeft, safeTop, safeSize, safeSize)
                             val resized = Bitmap.createScaledBitmap(cropped, 300, 300, true)
-                            Log.d("Cropper", "Resized: ${resized.width}x${resized.height}")
-
                             val rgbBitmap = resized.copy(Bitmap.Config.ARGB_8888, false)
-                            Log.d("Cropper", "Final bitmap: ${rgbBitmap.width}x${rgbBitmap.height}, config: ${rgbBitmap.config}")
 
                             onCropComplete(rgbBitmap)
-                            Log.d("Cropper", "onCropComplete CALLED")
-                        } else {
-                            Log.e("Cropper", "Cannot crop: cropSize=$cropDisplaySize, canvas=${canvasSize.width}")
                         }
                     }) {
                         Icon(Icons.Default.Check, "Готово", tint = Color(0xFF4CAF50))
