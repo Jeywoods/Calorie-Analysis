@@ -1,7 +1,7 @@
 package com.jeywoods.foodcalorieanalyzer.presentation.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material3.*
@@ -29,7 +29,7 @@ fun AppBottomBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem(Screen.Analyzer, Icons.Outlined.CameraAlt, "Анализ"),
         BottomNavItem(Screen.Diary, Icons.Outlined.MenuBook, "Дневник"),
-        BottomNavItem(Screen.History, Icons.Outlined.BarChart, "История")
+        BottomNavItem(Screen.History, Icons.Outlined.CalendarMonth, "Календарь")
     )
 
     NavigationBar(

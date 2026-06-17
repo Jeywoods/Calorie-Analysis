@@ -28,7 +28,7 @@ import java.util.*
 sealed class Screen(val route: String, val title: String, val index: Int) {
     object Analyzer : Screen("analyzer", "Анализ калорий", 0)
     object Diary : Screen("diary", "Дневник питания", 1)
-    object History : Screen("history", "История", 2)
+    object History : Screen("history", "Календарь питания", 2)
 }
 
 @Composable
