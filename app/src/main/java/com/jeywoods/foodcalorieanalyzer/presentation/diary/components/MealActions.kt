@@ -34,128 +34,149 @@ fun MealActions(
     onGramsTextChanged: (String) -> Unit,
     onEditClick: () -> Unit,
     onSaveClick: (Float) -> Unit,
-    onValidationError: () -> Unit,
     onDelete: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
     val textFieldValueState = remember { mutableStateOf(TextFieldValue(gramsText, TextRange(gramsText.length))) }
+    var showError by remember { mutableStateOf(false) }
 
     LaunchedEffect(isEditing) {
         if (isEditing) {
             delay(300)
             focusRequester.requestFocus()
+            showError = false
         }
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AnimatedVisibility(visible = isEditing) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnimatedVisibility(visible = isEditing) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    BasicTextField(
-                        value = textFieldValueState.value,
-                        onValueChange = { newValue ->
-                            val text = newValue.text
-                            if (text.isEmpty()) {
-                                onGramsTextChanged("")
-                                textFieldValueState.value = TextFieldValue("", TextRange(0))
-                            } else if (text.all { it.isDigit() } && text.length <= 4) {
-                                onGramsTextChanged(text)
-                                textFieldValueState.value = TextFieldValue(text, TextRange(text.length))
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(
+                                if (showError) 1.dp else 1.dp,
+                                if (showError) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BasicTextField(
+                            value = textFieldValueState.value,
+                            onValueChange = { newValue ->
+                                val text = newValue.text
+                                if (text.isEmpty()) {
+                                    onGramsTextChanged("")
+                                    textFieldValueState.value = TextFieldValue("", TextRange(0))
+                                    showError = false
+                                } else if (text.all { it.isDigit() } && text.length <= 4) {
+                                    onGramsTextChanged(text)
+                                    textFieldValueState.value = TextFieldValue(text, TextRange(text.length))
+                                    showError = false
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .focusRequester(focusRequester),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            ),
+                            decorationBox = { innerTextField ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    innerTextField()
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                }
+                            }
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            val grams = gramsText.toFloatOrNull() ?: 0f
+                            if (grams > 0) {
+                                onSaveClick(grams)
+                                showError = false
+                            } else {
+                                showError = true
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .focusRequester(focusRequester),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.Center
-                        ),
-                        decorationBox = { innerTextField ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                innerTextField()
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("г", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                            }
-                        }
-                    )
+                        modifier = Modifier.weight(1f).height(44.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    ) {
+                        Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Сохранить", style = MaterialTheme.typography.labelLarge)
+                    }
                 }
-                Button(
-                    onClick = {
-                        val grams = gramsText.toFloatOrNull() ?: 0f
-                        if (grams > 0) {
-                            onSaveClick(grams)
-                        } else {
-                            onValidationError()
-                        }
-                    },
-                    modifier = Modifier.weight(1f).height(44.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+            }
+
+            AnimatedVisibility(visible = !isEditing) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Outlined.Check, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Сохранить", style = MaterialTheme.typography.labelLarge)
+                    Button(
+                        onClick = {
+                            textFieldValueState.value = TextFieldValue(gramsText, TextRange(gramsText.length))
+                            onEditClick()
+                        },
+                        modifier = Modifier.weight(1f).height(44.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(18.dp))
+                        Text("Изменить вес", style = MaterialTheme.typography.labelLarge)
+                    }
+
+                    Button(
+                        onClick = onDelete,
+                        modifier = Modifier.weight(1f).height(44.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Icon(Icons.Outlined.Delete, null, modifier = Modifier.size(18.dp))
+                        Text("Удалить", style = MaterialTheme.typography.labelLarge)
+                    }
                 }
             }
         }
 
-        AnimatedVisibility(visible = !isEditing) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = {
-                        textFieldValueState.value = TextFieldValue(gramsText, TextRange(gramsText.length))
-                        onEditClick()
-                    },
-                    modifier = Modifier.weight(1f).height(44.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(18.dp))
-                    Text("Изменить вес", style = MaterialTheme.typography.labelLarge)
-                }
-
-                Button(
-                    onClick = onDelete,
-                    modifier = Modifier.weight(1f).height(44.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(Icons.Outlined.Delete, null, modifier = Modifier.size(18.dp))
-                    Text("Удалить", style = MaterialTheme.typography.labelLarge)
-                }
-            }
+        // Ошибка под полем
+        if (showError) {
+            Text(
+                "Вес не может быть 0",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+            )
         }
     }
 }

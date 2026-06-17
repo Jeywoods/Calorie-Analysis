@@ -82,7 +82,6 @@ fun MealCard(
                     onEditingChanged(false)
                     isEditing = false
                 },
-                onValidationError = { onError("Вес не может быть 0") },
                 onDelete = onDelete
             )
         }
