@@ -121,32 +121,48 @@ fun GramInputSection(
 
     if (showCustomDialog) {
         var customGrams by remember { mutableStateOf("") }
+        var dialogError by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
 
         AlertDialog(
-            onDismissRequest = { showCustomDialog = false },
+            onDismissRequest = {
+                showCustomDialog = false
+                dialogError = false
+            },
             title = { Text("Вес порции") },
             text = {
-                OutlinedTextField(
-                    value = customGrams,
-                    onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= 4) {
-                            customGrams = newValue
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Введите вес в граммах") },
-                    suffix = { Text("г") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = { focusManager.clearFocus() }
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                Column {
+                    OutlinedTextField(
+                        value = customGrams,
+                        onValueChange = { newValue ->
+                            if (newValue.all { it.isDigit() } && newValue.length <= 4) {
+                                customGrams = newValue
+                                dialogError = false
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Введите вес в граммах") },
+                        suffix = { Text("г") },
+                        singleLine = true,
+                        isError = dialogError,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() }
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    if (dialogError) {
+                        Text(
+                            "Вес не может быть 0",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
@@ -155,6 +171,9 @@ fun GramInputSection(
                         if (grams > 0) {
                             selectGrams(grams)
                             showCustomDialog = false
+                            dialogError = false
+                        } else {
+                            dialogError = true
                         }
                     }
                 ) {
@@ -162,7 +181,10 @@ fun GramInputSection(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCustomDialog = false }) {
+                TextButton(onClick = {
+                    showCustomDialog = false
+                    dialogError = false
+                }) {
                     Text("Отмена")
                 }
             }
