@@ -119,8 +119,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    // CSV
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
