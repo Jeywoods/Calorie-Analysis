@@ -18,3 +18,10 @@ captures/
 *.jks
 *.keystore
 google-services.json
+
+# Gradle
+gradle/wrapper/gradle-wrapper.jar
+
+# Keystore
+*.jks
+*.keystore

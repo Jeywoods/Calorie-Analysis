@@ -1,5 +1,6 @@
 package com.jeywoods.foodcalorieanalyzer.di
 
+import android.util.Log
 import com.jeywoods.foodcalorieanalyzer.data.remote.CalorieNinjasApi
 import dagger.Module
 import dagger.Provides
@@ -9,8 +10,8 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import com.jeywoods.foodcalorieanalyzer.BuildConfig
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -19,13 +20,17 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
-        }
+        Log.d("NetworkModule", "API Key: '${BuildConfig.CALORIE_NINJAS_API_KEY}'")
         return OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("X-Api-Key", BuildConfig.CALORIE_NINJAS_API_KEY)
+                    .build()
+                chain.proceed(request)
+            }
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
             .build()
     }
 
