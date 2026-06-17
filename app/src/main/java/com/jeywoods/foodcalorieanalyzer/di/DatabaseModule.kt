@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.jeywoods.foodcalorieanalyzer.data.local.dao.ClassificationCacheDao
 import com.jeywoods.foodcalorieanalyzer.data.local.dao.MealDao
+import com.jeywoods.foodcalorieanalyzer.data.local.dao.NutritionCacheDao
 import com.jeywoods.foodcalorieanalyzer.data.local.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -36,5 +37,10 @@ object DatabaseModule {
     @Provides
     fun provideClassificationCacheDao(database: AppDatabase): ClassificationCacheDao {
         return database.classificationCacheDao()
+    }
+
+    @Provides
+    fun provideNutritionCacheDao(database: AppDatabase): NutritionCacheDao {
+        return database.nutritionCacheDao()
     }
 }
