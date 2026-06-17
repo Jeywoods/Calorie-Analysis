@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,23 +30,23 @@ fun DailySummaryCard(summary: DailySummary) {
     var expanded by remember { mutableStateOf(false) }
     val bgColor = Color(0xFF2D5A1E)
 
-    val totalNutrients = summary.totalProtein + summary.totalFat + summary.totalCarbs + summary.totalFiber
+    val totalNutrients = summary.totalProtein + summary.totalFat + summary.totalCarbs
     val proteinPercent = if (totalNutrients > 0) summary.totalProtein / totalNutrients else 0f
     val fatPercent = if (totalNutrients > 0) summary.totalFat / totalNutrients else 0f
     val carbsPercent = if (totalNutrients > 0) summary.totalCarbs / totalNutrients else 0f
-    val fiberPercent = if (totalNutrients > 0) summary.totalFiber / totalNutrients else 0f
 
     val segments = listOf(
         "Белки" to (proteinPercent to ProteinColor),
         "Жиры" to (fatPercent to FatColor),
-        "Углев." to (carbsPercent to CarbsColor),
-        "Клетч." to (fiberPercent to Color(0xFF81C784))
+        "Углев." to (carbsPercent to CarbsColor)
     ).filter { it.second.first > 0f }
+
+    val density = LocalDensity.current
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = bgColor)
     ) {
@@ -62,7 +64,6 @@ fun DailySummaryCard(summary: DailySummary) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Кольцо с калориями и процентами
             Box(
                 modifier = Modifier.size(160.dp),
                 contentAlignment = Alignment.Center
@@ -75,6 +76,9 @@ fun DailySummaryCard(summary: DailySummary) {
                     val topLeft = Offset(center.x - radius, center.y - radius)
 
                     var startAngle = -90f
+
+                    val textSizePx = with(density) { 16.sp.toPx() }
+                    val labelOffset = with(density) { 18.dp.toPx() }
 
                     segments.forEach { (_, data) ->
                         val (percent, color) = data
@@ -90,23 +94,25 @@ fun DailySummaryCard(summary: DailySummary) {
                             style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
                         )
 
-                        // Процент снаружи кольца
-                        if (percent > 0.01f) {
+                        if (percent > 0.03f) {
                             val midAngle = Math.toRadians((startAngle + sweepAngle / 2).toDouble())
-                            val textRadius = radius + strokeWidth / 2f + 22f
+                            val textRadius = radius + strokeWidth / 2f + labelOffset
+
                             val x = center.x + (textRadius * cos(midAngle)).toFloat()
                             val y = center.y + (textRadius * sin(midAngle)).toFloat()
 
                             val paint = android.graphics.Paint().apply {
-                                this.color = android.graphics.Color.WHITE
-                                textSize = 40f  // крупнее
+                                this.color = Color.White.toArgb()
+                                this.textSize = textSizePx
                                 textAlign = android.graphics.Paint.Align.CENTER
                                 isAntiAlias = true
                                 typeface = android.graphics.Typeface.DEFAULT_BOLD
                             }
+
                             drawContext.canvas.nativeCanvas.drawText(
                                 "${(percent * 100).toInt()}%",
-                                x, y + 10f,
+                                x,
+                                y + textSizePx / 3f,
                                 paint
                             )
                         }
@@ -115,7 +121,6 @@ fun DailySummaryCard(summary: DailySummary) {
                     }
                 }
 
-                // Калории в центре
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         "${summary.totalCalories.toInt()}",
@@ -134,27 +139,16 @@ fun DailySummaryCard(summary: DailySummary) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Легенда 4 элемента
-            Column(
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            // Легенда — 3 элемента
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    LegendDot("Белки", summary.totalProtein, "г", ProteinColor)
-                    LegendDot("Жиры", summary.totalFat, "г", FatColor)
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    LegendDot("Углеводы", summary.totalCarbs, "г", CarbsColor)
-                    LegendDot("Клетчатка", summary.totalFiber, "г", Color(0xFF81C784))
-                }
+                LegendDot("Белки", summary.totalProtein, "г", ProteinColor)
+                LegendDot("Жиры", summary.totalFat, "г", FatColor)
+                LegendDot("Углеводы", summary.totalCarbs, "г", CarbsColor)
             }
 
-            // Кнопка деталей
             TextButton(
                 onClick = { expanded = !expanded },
                 contentPadding = PaddingValues(0.dp),
@@ -167,33 +161,32 @@ fun DailySummaryCard(summary: DailySummary) {
                 )
             }
 
-            // Детали в 2 колонки
             AnimatedVisibility(visible = expanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        DetailBox("Клетчатка", summary.totalFiber, "г", Modifier.weight(1f))
                         DetailBox("Нас. жиры", summary.totalSaturatedFat, "г", Modifier.weight(1f))
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         DetailBox("Сахар", summary.totalSugar, "г", Modifier.weight(1f))
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
                         DetailBox("Натрий", summary.totalSodium, "мг", Modifier.weight(1f))
-                        DetailBox("Калий", summary.totalPotassium, "мг", Modifier.weight(1f))
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        DetailBox("Холестерин", summary.totalCholesterol, "мг", Modifier.fillMaxWidth())
+                        DetailBox("Калий", summary.totalPotassium, "мг", Modifier.weight(1f))
+                        DetailBox("Холестерин", summary.totalCholesterol, "мг", Modifier.weight(1f))
                     }
                 }
             }
 
-            // Количество блюд
             if (summary.mealCount > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(

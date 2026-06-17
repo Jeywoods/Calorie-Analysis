@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,18 +48,18 @@ fun DaySummaryHeader(
     val totalPotassium = meals.sumOf { it.potassium.toDouble() }.toFloat()
     val totalCholesterol = meals.sumOf { it.cholesterol.toDouble() }.toFloat()
 
-    val totalNutrients = totalProtein + totalFat + totalCarbs + totalFiber
+    val totalNutrients = totalProtein + totalFat + totalCarbs
     val proteinPercent = if (totalNutrients > 0) totalProtein / totalNutrients else 0f
     val fatPercent = if (totalNutrients > 0) totalFat / totalNutrients else 0f
     val carbsPercent = if (totalNutrients > 0) totalCarbs / totalNutrients else 0f
-    val fiberPercent = if (totalNutrients > 0) totalFiber / totalNutrients else 0f
 
     val segments = listOf(
         "Белки" to (proteinPercent to ProteinColor),
         "Жиры" to (fatPercent to FatColor),
-        "Углев." to (carbsPercent to CarbsColor),
-        "Клетч." to (fiberPercent to Color(0xFF81C784))
+        "Углев." to (carbsPercent to CarbsColor)
     ).filter { it.second.first > 0f }
+
+    val density = LocalDensity.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -68,7 +70,6 @@ fun DaySummaryHeader(
             modifier = Modifier.padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Заголовок
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -89,7 +90,6 @@ fun DaySummaryHeader(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Кольцо с калориями и процентами
             Box(
                 modifier = Modifier.size(160.dp),
                 contentAlignment = Alignment.Center
@@ -102,6 +102,9 @@ fun DaySummaryHeader(
                     val topLeft = Offset(center.x - radius, center.y - radius)
 
                     var startAngle = -90f
+
+                    val textSizePx = with(density) { 16.sp.toPx() }
+                    val labelOffset = with(density) { 18.dp.toPx() }
 
                     segments.forEach { (_, data) ->
                         val (percent, color) = data
@@ -117,22 +120,25 @@ fun DaySummaryHeader(
                             style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
                         )
 
-                        if (percent > 0.01f) {
+                        if (percent > 0.03f) {
                             val midAngle = Math.toRadians((startAngle + sweepAngle / 2).toDouble())
-                            val textRadius = radius + strokeWidth / 2f + 22f
+                            val textRadius = radius + strokeWidth / 2f + labelOffset
+
                             val x = center.x + (textRadius * cos(midAngle)).toFloat()
                             val y = center.y + (textRadius * sin(midAngle)).toFloat()
 
                             val paint = android.graphics.Paint().apply {
-                                this.color = android.graphics.Color.WHITE
-                                textSize = 40f
+                                this.color = Color.White.toArgb()
+                                this.textSize = textSizePx
                                 textAlign = android.graphics.Paint.Align.CENTER
                                 isAntiAlias = true
                                 typeface = android.graphics.Typeface.DEFAULT_BOLD
                             }
+
                             drawContext.canvas.nativeCanvas.drawText(
                                 "${(percent * 100).toInt()}%",
-                                x, y + 10f,
+                                x,
+                                y + textSizePx / 3f,
                                 paint
                             )
                         }
@@ -159,25 +165,16 @@ fun DaySummaryHeader(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Легенда в 2 строки
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    LegendDot("Белки", totalProtein, "г", ProteinColor)
-                    LegendDot("Жиры", totalFat, "г", FatColor)
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    LegendDot("Углеводы", totalCarbs, "г", CarbsColor)
-                    LegendDot("Клетчатка", totalFiber, "г", Color(0xFF81C784))
-                }
+            // Легенда — 3 элемента
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                LegendDot("Белки", totalProtein, "г", ProteinColor)
+                LegendDot("Жиры", totalFat, "г", FatColor)
+                LegendDot("Углеводы", totalCarbs, "г", CarbsColor)
             }
 
-            // Кнопка деталей
             TextButton(
                 onClick = { expanded = !expanded },
                 contentPadding = PaddingValues(0.dp),
@@ -190,28 +187,28 @@ fun DaySummaryHeader(
                 )
             }
 
-            // Детали в 2 колонки
             AnimatedVisibility(visible = expanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        DayDetailBox("Клетчатка", if (totalFiber > 0) String.format(Locale.US, "%.1f", totalFiber) else "—", "г", Modifier.weight(1f))
                         DayDetailBox("Нас. жиры", if (totalSaturatedFat > 0) String.format(Locale.US, "%.1f", totalSaturatedFat) else "—", "г", Modifier.weight(1f))
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         DayDetailBox("Сахар", if (totalSugar > 0) String.format(Locale.US, "%.1f", totalSugar) else "—", "г", Modifier.weight(1f))
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
                         DayDetailBox("Натрий", if (totalSodium > 0) String.format(Locale.US, "%.0f", totalSodium) else "—", "мг", Modifier.weight(1f))
-                        DayDetailBox("Калий", if (totalPotassium > 0) String.format(Locale.US, "%.0f", totalPotassium) else "—", "мг", Modifier.weight(1f))
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        DayDetailBox("Холестерин", if (totalCholesterol > 0) String.format(Locale.US, "%.0f", totalCholesterol) else "—", "мг", Modifier.fillMaxWidth())
+                        DayDetailBox("Калий", if (totalPotassium > 0) String.format(Locale.US, "%.0f", totalPotassium) else "—", "мг", Modifier.weight(1f))
+                        DayDetailBox("Холестерин", if (totalCholesterol > 0) String.format(Locale.US, "%.0f", totalCholesterol) else "—", "мг", Modifier.weight(1f))
                     }
                 }
             }
