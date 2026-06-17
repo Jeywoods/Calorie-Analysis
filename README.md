@@ -131,7 +131,7 @@ cd food-calorie-analyzer
 
 **2. Добавьте API-ключ**
 
-Создайте файл `local.properties` в корне проекта:
+Создайте файл `gradle.properties` в корне проекта:
 ```properties
 CALORIE_NINJAS_API_KEY=your_api_key_here
 ```
