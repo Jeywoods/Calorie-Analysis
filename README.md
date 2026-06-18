@@ -140,7 +140,7 @@ cd food-calorie-analyzer
 
 <!--
 <div align="center">
-<img src="screenshots/home.png" width="200"/>
+<img src="screenshots/AnalysisScreen.jpg" width="200"/>
 <img src="screenshots/analyzer.png" width="200"/>
 <img src="screenshots/diary.png" width="200"/>
 <img src="screenshots/history.png" width="200"/>
