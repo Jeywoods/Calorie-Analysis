@@ -15,7 +15,7 @@
 
 <br/>
 
-[📲 Скачать APK]([#-запуск](https://github.com/Jeywoods/Calorie-Analysis/releases/tag/v1.0.0)) · [📖 Документация](#-архитектура) · [🐛 Сообщить о баге](https://github.com/your-username/food-calorie-analyzer/issues)
+[📲 Скачать APK](https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis-v1.0.0-debug.apk) · [📖 Документация](#-архитектура) · [🐛 Сообщить о баге](https://github.com/Jeywoods/food-calorie-analyzer/issues)
 
 </div>
 
