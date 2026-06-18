@@ -20,8 +20,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        val apiKey = project.findProperty("CALORIE_NINJAS_API_KEY") as? String ?: ""
-        buildConfigField("String", "CALORIE_NINJAS_API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {

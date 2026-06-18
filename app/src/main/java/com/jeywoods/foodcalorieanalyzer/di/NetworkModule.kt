@@ -20,11 +20,11 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        Log.d("NetworkModule", "API Key: '${BuildConfig.CALORIE_NINJAS_API_KEY}'")
+        Log.d("NetworkModule", "API Key: 8ETy0U3Cb7KFZ4N66ldiGjBeV4i1w4UnN0jmNPea")
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
-                    .addHeader("X-Api-Key", BuildConfig.CALORIE_NINJAS_API_KEY)
+                    .addHeader("X-Api-Key", "8ETy0U3Cb7KFZ4N66ldiGjBeV4i1w4UnN0jmNPea")
                     .build()
                 chain.proceed(request)
             }
