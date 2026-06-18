@@ -136,16 +136,12 @@ cd food-calorie-analyzer
 
 ## 📱 Скриншоты
 
-> _Добавьте скриншоты в папку `/screenshots` и раскомментируйте блок ниже_
-
-<!--
 <div align="center">
 <img src="screenshots/AnalysisScreen.jpg" width="200"/>
 <img src="screenshots/analyzer.png" width="200"/>
 <img src="screenshots/diary.png" width="200"/>
 <img src="screenshots/history.png" width="200"/>
 </div>
--->
 <div align="center">
 
 </div>
