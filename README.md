@@ -1,3 +1,4 @@
+исправь проблемы с визуальной частью
 <div align="center">
 
 <img src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
@@ -5,39 +6,31 @@
 <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white"/>
 <img src="https://img.shields.io/badge/TensorFlow_Lite-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white"/>
 
-<br><br>
+<br/><br/>
 
-<h1>🥗 Анализатор калорий</h1>
+# 🥗 Анализатор калорий
 
-<h3>Сфотографируй блюдо — узнай всё о его составе</h3>
+### Сфотографируй блюдо — узнай всё о его составе
 
-<p>
 Нейросеть распознаёт еду по фото, считает КБЖУ и ведёт дневник питания с визуальными отчётами.
-</p>
 
-<br>
-
-<a href="https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis.apk">
-    <img src="https://img.shields.io/badge/📲_Скачать_APK-success?style=for-the-badge"/>
-</a>
-
-</div>
-
----
+<br/>
 
 ## 📱 Скриншоты
 
 <div align="center">
+<img src="screenshots/AnalysisScreen.jpg" width="200"/>
+<img src="screenshots/AnalysisScreenStep1.jpg" width="200"/>
+<img src="screenshots/AnalysisScreenStep2.jpg" width="200"/>
+<img src="screenshots/DiaryScreen.jpg" width="200"/>
+<img src="screenshots/DiaryScreenWithDeatails.jpg" width="200"/>
+<img src="screenshots/CalendarScreen.jpg" width="200"/>
+</div>
+<div align="center">
 
-<img src="screenshots/AnalysisScreen.jpg" width="180"/>
-<img src="screenshots/AnalysisScreenStep1.jpg" width="180"/>
-<img src="screenshots/AnalysisScreenStep2.jpg" width="180"/>
 
-<br><br>
 
-<img src="screenshots/DiaryScreen.jpg" width="180"/>
-<img src="screenshots/DiaryScreenWithDeatails.jpg" width="180"/>
-<img src="screenshots/CalendarScreen.jpg" width="180"/>
+[📲 Скачать APK](https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis.apk)
 
 </div>
 
@@ -47,33 +40,111 @@
 
 <table>
 <tr>
-<td width="50%" valign="top">
+<td width="50%">
 
-<h3>📸 Распознавание блюд</h3>
-Сфотографируйте еду или выберите фото из галереи — нейросеть Food101 определит блюдо за секунды.
+**📸 Распознавание блюд**
+Сфотографируйте еду или выберите из галереи — нейросеть Food101 определит блюдо за секунды.
 
-<h3>🔍 База данных</h3>
+**🔍 База данных**
 Более 100 блюд с поиском по названию и мгновенной фильтрацией.
 
-<h3>⚖️ Полный нутриентный профиль</h3>
-Белки, жиры, углеводы, клетчатка, насыщенные жиры, сахар, натрий, калий и холестерин.
+**⚖️ Полный нутриентный профиль**
+Белки, жиры, углеводы, клетчатка, насыщенные жиры, сахар, натрий, калий, холестерин.
 
-<h3>📊 Визуализация</h3>
+**📊 Визуализация**
 Круговая диаграмма баланса макронутриентов для каждого приёма пищи.
 
 </td>
+<td width="50%">
 
-<td width="50%" valign="top">
-
-<h3>📅 Дневник питания</h3>
+**📅 Дневник питания**
 Запись приёмов пищи по дням с возможностью редактировать вес порций.
 
-<h3>📈 Календарь питания</h3>
+**📈 Календарь питания**
 Просмотр статистики за любой день через встроенный календарь.
 
-<h3>💡 Советы по питанию</h3>
+**💡 Советы по питанию**
 Персонализированные рекомендации на главном экране.
+
 
 </td>
 </tr>
 </table>
+
+---
+
+## 🛠 Технологии
+
+| Категория | Стек |
+|:----------|:-----|
+| **Язык** | Kotlin |
+| **UI** | Jetpack Compose + Material 3 |
+| **DI** | Hilt |
+| **База данных** | Room |
+| **Нейросеть** | TensorFlow Lite (Food101) |
+| **API** | Retrofit + OkHttp (CalorieNinjas) |
+| **Изображения** | Coil |
+| **Навигация** | Navigation Compose |
+| **Асинхронность** | Kotlin Coroutines + Flow |
+
+---
+
+## 🏛 Архитектура
+
+Проект построен на **Clean Architecture** с чётким разделением ответственности между слоями.
+
+```
+📦 foodcalorieanalyzer
+├── 📂 data
+│   ├── 📂 local        # Room, DAO, Entity
+│   ├── 📂 remote       # API, DTO
+│   ├── 📂 mapper       # Маппинг данных
+│   └── 📂 ml           # TensorFlow модели
+├── 📂 domain
+│   ├── 📂 model        # Бизнес-модели
+│   ├── 📂 repository   # Интерфейсы репозиториев
+│   └── 📂 usecase      # Use cases
+├── 📂 presentation
+│   ├── 📂 analyzer     # Экран распознавания
+│   ├── 📂 diary        # Дневник питания
+│   ├── 📂 history      # История и статистика
+│   └── 📂 onboarding   # Онбординг
+└── 📂 di               # Hilt модули
+```
+
+### Поток данных
+
+```
+Фото → TFLite (Food101)
+           ↓
+     Название блюда → CalorieNinjas API
+                              ↓
+                      Нутриенты → Room DB
+                                      ↓
+                               Compose UI
+```
+
+---
+
+## 🚀 Запуск
+
+### Требования
+
+- Android Studio Hedgehog или новее
+- JDK 17+
+- Android 7.0+ (API 24)
+
+### Установка
+
+**1. Клонируйте репозиторий**
+```bash
+git clone https://github.com/your-username/food-calorie-analyzer.git
+cd food-calorie-analyzer
+```
+**2. Запустите приложение**
+```bash
+./gradlew installDebug
+```
+> Получить свой ключ можно бесплатно на [calorieninjas.com](https://calorieninjas.com)
+
+</div>
