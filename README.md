@@ -138,9 +138,11 @@ cd food-calorie-analyzer
 
 <div align="center">
 <img src="screenshots/AnalysisScreen.jpg" width="200"/>
-<img src="screenshots/analyzer.png" width="200"/>
-<img src="screenshots/diary.png" width="200"/>
-<img src="screenshots/history.png" width="200"/>
+<img src="screenshots/AnalysisScreenStep1.jpg" width="200"/>
+<img src="screenshots/AnalysisScreenStep2.jpg" width="200"/>
+<img src="screenshots/DiaryScreen.jpg" width="200"/>
+<img src="screenshots/DiaryScreenWithDeatails.jpg" width="200"/>
+<img src="screenshots/CalendarScreen.jpg" width="200"/>
 </div>
 <div align="center">
 
