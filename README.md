@@ -15,7 +15,7 @@
 
 <br/>
 
-[📲 Скачать APK](https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis.apk) · [📖 Документация](#-архитектура)
+[📲 Скачать APK](https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis.apk)
 
 </div>
 
