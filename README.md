@@ -126,22 +126,11 @@
 git clone https://github.com/your-username/food-calorie-analyzer.git
 cd food-calorie-analyzer
 ```
-
-**2. Добавьте API-ключ**
-
-Создайте файл `gradle.properties` в корне проекта:
-```properties
-CALORIE_NINJAS_API_KEY=your_api_key_here
-```
-
-> Получить ключ можно бесплатно на [calorieninjas.com](https://calorieninjas.com)
-
-**3. Запустите приложение**
+**2. Запустите приложение**
 ```bash
 ./gradlew installDebug
 ```
-
-Или откройте проект в Android Studio и нажмите **Run ▶️**
+> Получить свой ключ можно бесплатно на [calorieninjas.com](https://calorieninjas.com)
 
 ---
 
@@ -157,15 +146,6 @@ CALORIE_NINJAS_API_KEY=your_api_key_here
 <img src="screenshots/history.png" width="200"/>
 </div>
 -->
-
----
-
-## 📄 Лицензия
-
-Распространяется под лицензией MIT. Подробнее — в файле [LICENSE](LICENSE).
-
----
-
 <div align="center">
 
 </div>
