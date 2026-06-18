@@ -15,6 +15,20 @@
 
 <br/>
 
+## 📱 Скриншоты
+
+<div align="center">
+<img src="screenshots/AnalysisScreen.jpg" width="200"/>
+<img src="screenshots/AnalysisScreenStep1.jpg" width="200"/>
+<img src="screenshots/AnalysisScreenStep2.jpg" width="200"/>
+<img src="screenshots/DiaryScreen.jpg" width="200"/>
+<img src="screenshots/DiaryScreenWithDeatails.jpg" width="200"/>
+<img src="screenshots/CalendarScreen.jpg" width="200"/>
+</div>
+<div align="center">
+
+
+
 [📲 Скачать APK](https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis.apk)
 
 </div>
@@ -131,19 +145,5 @@ cd food-calorie-analyzer
 ./gradlew installDebug
 ```
 > Получить свой ключ можно бесплатно на [calorieninjas.com](https://calorieninjas.com)
-
----
-
-## 📱 Скриншоты
-
-<div align="center">
-<img src="screenshots/AnalysisScreen.jpg" width="200"/>
-<img src="screenshots/AnalysisScreenStep1.jpg" width="200"/>
-<img src="screenshots/AnalysisScreenStep2.jpg" width="200"/>
-<img src="screenshots/DiaryScreen.jpg" width="200"/>
-<img src="screenshots/DiaryScreenWithDeatails.jpg" width="200"/>
-<img src="screenshots/CalendarScreen.jpg" width="200"/>
-</div>
-<div align="center">
 
 </div>
