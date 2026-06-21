@@ -70,26 +70,23 @@
 
 ---
 
-</div> <!-- Закрываем центрирующий div -->
+</div> 
 
-<!-- ТАБЛИЦА ТЕХНОЛОГИЙ ВНЕ CENTER-БЛОКА, ПО ЛЕВОМУ КРАЮ -->
 ## 🛠 Технологии
 
-| Категория | Стек |
-|:----------|:-----|
-| **Язык** | Kotlin |
-| **UI** | Jetpack Compose + Material 3 |
-| **DI** | Hilt |
-| **База данных** | Room |
-| **Нейросеть** | TensorFlow Lite (Food101) |
-| **API** | Retrofit + OkHttp (CalorieNinjas) |
-| **Изображения** | Coil |
-| **Навигация** | Navigation Compose |
-| **Асинхронность** | Kotlin Coroutines + Flow |
+- **Язык:** Kotlin
+- **UI:** Jetpack Compose + Material 3
+- **DI:** Hilt
+- **База данных:** Room
+- **Нейросеть:** TensorFlow Lite (Food101)
+- **API:** Retrofit + OkHttp (CalorieNinjas)
+- **Изображения:** Coil
+- **Навигация:** Navigation Compose
+- **Асинхронность:** Kotlin Coroutines + Flow
 
 ---
 
-<div align="center"> <!-- Снова открываем для оставшейся центрированной части -->
+<div align="center">
 
 ## 🚀 Запуск
 
