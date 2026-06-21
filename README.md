@@ -85,9 +85,6 @@
 - **Асинхронность:** Kotlin Coroutines + Flow
 
 ---
-
-<div align="center">
-
 ## 🚀 Запуск
 
 ### Требования
