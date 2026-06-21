@@ -89,43 +89,6 @@
 
 ---
 
-## 🏛 Архитектура
-
-Проект построен на **Clean Architecture** с чётким разделением ответственности между слоями.
-
-```
-📦 foodcalorieanalyzer
-├── 📂 data
-│   ├── 📂 local        # Room, DAO, Entity
-│   ├── 📂 remote       # API, DTO
-│   ├── 📂 mapper       # Маппинг данных
-│   └── 📂 ml           # TensorFlow модели
-├── 📂 domain
-│   ├── 📂 model        # Бизнес-модели
-│   ├── 📂 repository   # Интерфейсы репозиториев
-│   └── 📂 usecase      # Use cases
-├── 📂 presentation
-│   ├── 📂 analyzer     # Экран распознавания
-│   ├── 📂 diary        # Дневник питания
-│   ├── 📂 history      # История и статистика
-│   └── 📂 onboarding   # Онбординг
-└── 📂 di               # Hilt модули
-```
-
-### Поток данных
-
-```
-Фото → TFLite (Food101)
-           ↓
-     Название блюда → CalorieNinjas API
-                              ↓
-                      Нутриенты → Room DB
-                                      ↓
-                               Compose UI
-```
-
----
-
 ## 🚀 Запуск
 
 ### Требования
