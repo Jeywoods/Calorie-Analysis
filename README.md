@@ -1,4 +1,3 @@
-исправь проблемы с визуальной частью
 <div align="center">
 
 <img src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
@@ -26,9 +25,8 @@
 <img src="screenshots/DiaryScreenWithDeatails.jpg" width="200"/>
 <img src="screenshots/CalendarScreen.jpg" width="200"/>
 </div>
+
 <div align="center">
-
-
 
 [📲 Скачать APK](https://github.com/Jeywoods/Calorie-Analysis/releases/download/v1.0.0/CalorieAnalysis.apk)
 
@@ -66,13 +64,15 @@
 **💡 Советы по питанию**
 Персонализированные рекомендации на главном экране.
 
-
 </td>
 </tr>
 </table>
 
 ---
 
+</div> <!-- Закрываем центрирующий div -->
+
+<!-- ТАБЛИЦА ТЕХНОЛОГИЙ ВНЕ CENTER-БЛОКА, ПО ЛЕВОМУ КРАЮ -->
 ## 🛠 Технологии
 
 | Категория | Стек |
@@ -89,6 +89,8 @@
 
 ---
 
+<div align="center"> <!-- Снова открываем для оставшейся центрированной части -->
+
 ## 🚀 Запуск
 
 ### Требования
@@ -103,11 +105,3 @@
 ```bash
 git clone https://github.com/your-username/food-calorie-analyzer.git
 cd food-calorie-analyzer
-```
-**2. Запустите приложение**
-```bash
-./gradlew installDebug
-```
-> Получить свой ключ можно бесплатно на [calorieninjas.com](https://calorieninjas.com)
-
-</div>
